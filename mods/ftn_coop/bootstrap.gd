@@ -2,7 +2,7 @@ extends Node
 
 const GameBindings = preload("res://mods/ftn_coop/game_bindings.gd")
 
-const VERSION := "0.8.0"
+const VERSION := "0.1.0"
 const REQUIRED_CAPABILITIES := [
 	"snapshot_capture", "snapshot_restore", "action_capture", "host_apply",
 	"guest_mutation_guard", "machine_host_only", "player_pose", "isolated_guest_session", "host_save",

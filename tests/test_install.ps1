@@ -53,7 +53,7 @@ $original = "[rendering]`r`nrendering_device/driver.windows=`"d3d12`"`r`n[autolo
 [System.IO.File]::WriteAllText($config, $original, [System.Text.UTF8Encoding]::new($true))
 $originalBytes = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($config))
 & $install -GameDir $game | Out-Null
-Require ((Get-Content -LiteralPath (Join-Path $game 'mods/ftn_coop/install-state.json') -Raw | ConvertFrom-Json).mod_version -eq '0.8.0') 'Installed metadata must record the package mod version.'
+Require ((Get-Content -LiteralPath (Join-Path $game 'mods/ftn_coop/install-state.json') -Raw | ConvertFrom-Json).mod_version -eq '0.1.0') 'Installed metadata must record the package mod version.'
 Require ((Get-Content -LiteralPath $config -Raw).Contains('OtherMod=')) 'Other autoload was lost.'
 Require ((Get-Content -LiteralPath $config -Raw).Contains('rendering_device/driver.windows="d3d12"')) 'Original renderer setting was lost.'
 $oldStatePath = Join-Path $game 'mods/ftn_coop/install-state.json'
@@ -61,7 +61,7 @@ $oldState = Get-Content -LiteralPath $oldStatePath -Raw | ConvertFrom-Json
 $oldState.PSObject.Properties.Remove('mod_version')
 [IO.File]::WriteAllText($oldStatePath,($oldState | ConvertTo-Json -Depth 5),[Text.UTF8Encoding]::new($false))
 & $install -GameDir $game | Out-Null
-Require ((Get-Content -LiteralPath $oldStatePath -Raw | ConvertFrom-Json).mod_version -eq '0.8.0') 'Updating an old manifest must add version metadata.'
+Require ((Get-Content -LiteralPath $oldStatePath -Raw | ConvertFrom-Json).mod_version -eq '0.1.0') 'Updating an old manifest must add version metadata.'
 Require (([regex]::Matches((Get-Content -LiteralPath $config -Raw), '(?m)^FtnCoop=')).Count -eq 1) 'Duplicate autoload entry.'
 $steamManifest = Join-Path (Split-Path -Parent (Split-Path -Parent $game)) 'appmanifest_5160800.acf'
 [IO.File]::WriteAllText($steamManifest, ([IO.File]::ReadAllText($steamManifest).Replace('26547680','99999999')))

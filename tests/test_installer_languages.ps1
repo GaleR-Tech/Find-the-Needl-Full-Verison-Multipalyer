@@ -4,7 +4,7 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'fixtures/installer_game.ps1')
 if (-not $SetupPath) {
     & (Join-Path $projectRoot 'tools\BuildInstaller.ps1')
-    $SetupPath = Join-Path $projectRoot 'dist\0.8\0.8.0\FTN-Coop-Full-0.8.0-Setup.exe'
+    $SetupPath = Join-Path $projectRoot 'dist\0.1\0.1.0\FTN-Coop-Full-0.1.0-Setup.exe'
 }
 if (-not $Worker) {
     # Isolate Windows Forms and culture changes, and bound unexpected modal dialogs.

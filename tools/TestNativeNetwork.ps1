@@ -8,11 +8,13 @@ param(
     [ValidateRange(0,300)][int]$PerformanceSeconds = 0,
     [switch]$Headless,
     [ValidateRange(-1,3)][int]$GraphicalPeer = -1,
+    [switch]$SeedBeltWitness,
     [string]$ModSource = ''
 )
 $ErrorActionPreference = 'Stop'
 if ($Headless -and $Presence) { throw 'Presence checks inspect native draw nodes and require a graphical runtime. Omit -Headless.' }
 if ($GraphicalPeer -ge 0 -and (-not $Headless -or $GraphicalPeer -ge $Players -or $PerformanceSeconds -lt 30)) { throw 'GraphicalPeer requires a valid peer index, -Headless and a performance scenario.' }
+if ($SeedBeltWitness -and $PerformanceSeconds -lt 30) { throw 'SeedBeltWitness requires a performance scenario.' }
 $workspaceRoot = Split-Path -Parent $PSScriptRoot
 if ($ModSource -eq '') { $ModSource = Join-Path $workspaceRoot 'mods\ftn_coop' }
 if (-not (Test-Path -LiteralPath (Join-Path $ModSource 'bootstrap.gd') -PathType Leaf)) { throw 'Missing mod source.' }
@@ -132,6 +134,7 @@ for ($nativeIndex=0; $nativeIndex -lt $Players; $nativeIndex++) {
     if ($Presence) { $launchArguments += '--ftn-coop-presence-check' }
     if ($Persistence) { $launchArguments += '--ftn-coop-save-check' }
     if ($PerformanceSeconds -gt 0) { $launchArguments += ('--ftn-performance-seconds='+$PerformanceSeconds) }
+    if ($SeedBeltWitness) { $launchArguments += '--ftn-seed-belt-witness' }
     if ($peerHeadless) { $launchArguments = @('--headless','--audio-driver','Dummy') + $launchArguments }
     $nativeProcesses += Start-Process -FilePath (Join-Path $privateGameDir 'FindTheNeedle.exe') -ArgumentList $launchArguments -WorkingDirectory $privateGameDir -WindowStyle Hidden -PassThru
     if ($nativeIndex -lt ($Players-1)) {

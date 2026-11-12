@@ -1,10 +1,10 @@
-﻿param([string]$SetupPath = '', [switch]$Worker)
+param([string]$SetupPath = '', [switch]$Worker)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'fixtures/installer_game.ps1')
 if (-not $SetupPath) {
     & (Join-Path $projectRoot 'tools/BuildInstaller.ps1')
-    $SetupPath = Join-Path $projectRoot 'dist/0.8/0.8.0/FTN-Coop-Full-0.8.0-Setup.exe'
+    $SetupPath = Join-Path $projectRoot 'dist/0.1/0.1.0/FTN-Coop-Full-0.1.0-Setup.exe'
 }
 if (-not $Worker) {
     $logBase = Join-Path ([IO.Path]::GetTempPath()) ('ftn-installer-states-'+[guid]::NewGuid().ToString('N'))
@@ -66,21 +66,21 @@ try {
     $directory.Text = $game
     Require ((Control $form 'InstallAction').Text -eq 'Install') 'A clean full game needs an Install action.'
     Require (-not (Control $form 'RemoveAction').Enabled) 'Remove must be unavailable without a managed installation.'
-    Require ((Control $form 'TargetVersion').Text.Contains('0.8.0')) 'The package version must be visible.'
+    Require ((Control $form 'TargetVersion').Text.Contains('0.1.0')) 'The package version must be visible.'
 
     $mod = Join-Path $game 'mods/ftn_coop'
     $null = New-Item -ItemType Directory -Path $mod -Force
     $manifestPath = Join-Path $mod 'install-state.json'
     $bootstrap = Join-Path $mod 'bootstrap.gd'
     [IO.File]::WriteAllText($manifestPath,'{"format":"FTN-Coop-Full-1","files":[]}',[Text.UTF8Encoding]::new($false))
-    [IO.File]::WriteAllText($bootstrap,'const VERSION := "0.1.2"',[Text.UTF8Encoding]::new($false))
+    [IO.File]::WriteAllText($bootstrap,'const VERSION := "0.0.9"',[Text.UTF8Encoding]::new($false))
     [IO.File]::WriteAllText((Join-Path $game 'override.cfg'),'[autoload]'+[Environment]::NewLine+'FtnCoop="*mods/ftn_coop/bootstrap.gd"',[Text.UTF8Encoding]::new($false))
     $result = Inspect $game
-    Require ((Field $result 'Managed') -and (Field $result 'Version') -eq '0.1.2') 'Old manifests must recover the installed version from the own bootstrap without executing it.'
+    Require ((Field $result 'Managed') -and (Field $result 'Version') -eq '0.0.9') 'Old manifests must recover the installed version from the own bootstrap without executing it.'
     $directory.Text = $testRoot
     $directory.Text = $game
     Require ((Control $form 'InstallAction').Text -eq 'Update') 'An older installation needs an Update action.'
-    Require ((Control $form 'InstalledVersion').Text.Contains('0.1.2')) 'The installed version must be visible.'
+    Require ((Control $form 'InstalledVersion').Text.Contains('0.0.9')) 'The installed version must be visible.'
     Require ((Control $form 'RemoveAction').Enabled) 'A managed installation can be removed.'
     $configPath = Join-Path $game 'override.cfg'
     foreach ($inactiveConfig in @(
@@ -93,9 +93,9 @@ try {
         Require ((Control $form 'InstalledVersion').Text -eq 'Not installed') 'An entry in another section or comment must not count as an active mod.'
     }
 
-    [IO.File]::WriteAllText($manifestPath,'{"format":"FTN-Coop-Full-1","mod_version":"0.8.0","files":[]}',[Text.UTF8Encoding]::new($false))
-    Require ((Field (Inspect $game) 'Version') -eq '0.8.0') 'New installation metadata must identify the current installed version.'
-    [IO.File]::WriteAllText($manifestPath,'{"format":"FTN-Coop-Full-1","mod_version":"0.8.0\nPRIVATE_DATA","files":[]}',[Text.UTF8Encoding]::new($false))
+    [IO.File]::WriteAllText($manifestPath,'{"format":"FTN-Coop-Full-1","mod_version":"0.1.0","files":[]}',[Text.UTF8Encoding]::new($false))
+    Require ((Field (Inspect $game) 'Version') -eq '0.1.0') 'New installation metadata must identify the current installed version.'
+    [IO.File]::WriteAllText($manifestPath,'{"format":"FTN-Coop-Full-1","mod_version":"0.1.0\nPRIVATE_DATA","files":[]}',[Text.UTF8Encoding]::new($false))
     Require ((Field (Inspect $game) 'Version') -eq '') 'Invalid version metadata must not be displayed as a version.'
     foreach ($invalid in @('{broken json','{"format":"FTN-Coop-1","files":[]}',('x'*2097153))) {
         [IO.File]::WriteAllText($manifestPath,$invalid,[Text.UTF8Encoding]::new($false))

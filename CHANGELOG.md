@@ -1,6 +1,6 @@
 # Changelog / Änderungen
 
-## 0.8.0 · Full game / Kaufversion
+## 0.1.0 · Full game / Kaufversion
 
 ### English
 

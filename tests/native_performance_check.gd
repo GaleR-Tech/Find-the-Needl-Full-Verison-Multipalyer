@@ -1,4 +1,4 @@
-# Real demo + normal playable-host runtime, using a copied save and loopback transport.
+# Native purchase edition with a playable host, copied save, and loopback transport.
 extends Node
 
 class MeteredTransport extends "res://mods/ftn_coop/local_transport.gd":
@@ -37,6 +37,7 @@ var _began := 0
 var _measure_at := 0
 var _duration := 60
 var _snapshot_loads := 0
+var _seed_belt_witness := false
 var _join_ms := 0
 
 func _ready() -> void: process_mode = Node.PROCESS_MODE_ALWAYS
@@ -51,6 +52,7 @@ func run(base: String, args: PackedStringArray) -> Dictionary:
 	_checks.game_build = game_build
 	_checks.render_backend = DisplayServer.get_name()
 	_duration = _argument(args,"--ftn-performance-seconds=","60").to_int()
+	_seed_belt_witness = args.has("--ftn-seed-belt-witness")
 	_directory = OS.get_environment("FTN_COOP_TEST_OUTPUT").replace("\\","/")
 	_adapter = load(base+"/performance_adapter.gd").new()
 	_adapter.bind(get_tree().root)
@@ -187,13 +189,14 @@ func _guest_actions() -> void:
 		_checks.integrity_detail = {"machines":proof,"belts":helper._checks.duplicate(true)}
 		await get_tree().create_timer(0.05).timeout
 	helper.free()
-	if not _checks.has("native_integrity"): _fatal = "NATIVE_INTEGRITY_FAILED"
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png(_directory+"/guest-"+str(_index)+".png")
 		await _capture_hay_views()
+		await _check_guest_menus()
 	else:
 		await _capture_hay_views(false)
+	if not _checks.has("native_integrity") and _fatal.is_empty(): _fatal = "NATIVE_INTEGRITY_FAILED"
 	_stage = "actions_done"
 	_write("RUNNING")
 
@@ -265,6 +268,15 @@ func _process(_delta: float) -> void:
 			_network.event_shape_active = true
 			_transport.packet_sizes.clear()
 	if _role=="host" and _stage=="measuring":
+		if _seed_belt_witness and Time.get_ticks_msec()-_measure_at>=(_duration-1)*1000:
+			var conveyors: Array = _adapter.nodes.builds.get("conveyors")
+			if not conveyors.is_empty():
+				var belt: Node = conveyors.back()
+				if belt.call("records_to_save").is_empty():
+					var start: Vector3 = belt.get("a")
+					var finish: Vector3 = belt.get("b")
+					belt.call("push_record",0,37,-1,{"strands":37},start.lerp(finish,0.15),0.7)
+				_checks.belt_witness_seeded = not belt.call("records_to_save").is_empty()
 		var complete := true
 		for index in range(1,_count):
 			if _read("guest-"+str(index)).get("stage")!="actions_done": complete = false
@@ -315,6 +327,7 @@ func _capture_hay_views(gpu: bool=true) -> void:
 	var player: Node3D = _adapter.nodes.player
 	var witness: RefCounted = load(get_script().resource_path.get_base_dir()+"/native_render_witness.gd").new()
 	var views := []
+	var error := ""
 	var number := 0
 	for position in [Vector3(0,6.0,14),Vector3(-10,6.0,10),Vector3(10,6.0,0)]:
 		player.global_position = position
@@ -323,12 +336,12 @@ func _capture_hay_views(gpu: bool=true) -> void:
 		await get_tree().create_timer(1.5).timeout
 		if gpu: await RenderingServer.frame_post_draw
 		var view: Dictionary = witness.inspect(_adapter)
-		if not view.lod_follows_camera or not view.machine_lod_static or view.invalid_transforms>0 or view.slot_errors>0: _fatal = "NATIVE_HAY_VIEW_INVALID"
+		if not view.lod_follows_camera or not view.machine_lod_static or view.invalid_transforms>0 or view.slot_errors>0: error = "NATIVE_HAY_VIEW_INVALID"
 		if gpu:
 			for path in ["res://scripts/build/belt_batch.gd","res://scripts/build/structure_cull.gd","res://scripts/world/shadow_lod.gd"]:
-				if not view.presentation.has(path): _fatal = "GUEST_PRESENTATION_MISSING"
+				if not view.presentation.has(path): error = "GUEST_PRESENTATION_MISSING"
 		for entry in view.presentation.values():
-			if entry.nodes!=entry.processing: _fatal = "GUEST_PRESENTATION_STOPPED"
+			if entry.nodes!=entry.processing: error = "GUEST_PRESENTATION_STOPPED"
 		view.position = position
 		view.gpu_rendered = gpu
 		views.append(view)
@@ -336,6 +349,36 @@ func _capture_hay_views(gpu: bool=true) -> void:
 		number += 1
 	# CPU visibility checks are separate evidence; they never certify pixels.
 	_checks["native_hay_views" if gpu else "native_visibility_cpu"] = views
+	if not error.is_empty() and _fatal.is_empty(): _fatal = error
+
+func _check_guest_menus() -> void:
+	var menus: Node = _runtime.guest_menus
+	var results := {}
+	if menus.active and menus._panels.size()==3:
+		for pair in [["build_catalog",0],["tech_tree",1],["ui_cancel",2]]:
+			var action: String = pair[0]
+			var panel: Node = menus._panels[pair[1]]
+			menus.close_panels()
+			if not await _press_native_key(action): continue
+			var opened: bool = panel.call("is_open")
+			var closed: bool = await _press_native_key("ui_cancel")
+			results[action] = opened and closed and not panel.call("is_open")
+	menus.close_panels()
+	_checks.native_guest_menus = results
+	if _fatal.is_empty() and (results.size()!=3 or results.values().has(false)): _fatal = "GUEST_MENU_INPUT_FAILED"
+
+func _press_native_key(action: String) -> bool:
+	for binding in InputMap.action_get_events(action):
+		if not binding is InputEventKey: continue
+		var event: InputEventKey = binding.duplicate()
+		event.pressed = true
+		Input.parse_input_event(event)
+		await get_tree().process_frame
+		event.pressed = false
+		Input.parse_input_event(event)
+		await get_tree().process_frame
+		return true
+	return false
 
 func _read(name: String) -> Dictionary:
 	var file := FileAccess.open(_directory+"/"+name+".json",FileAccess.READ)
