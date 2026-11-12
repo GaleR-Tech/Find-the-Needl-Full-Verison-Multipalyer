@@ -1,0 +1,39 @@
+$ErrorActionPreference = 'Stop'
+$projectRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'ArtifactPaths.ps1')
+$artifacts = Get-FtnArtifactPaths -ProjectRoot $projectRoot
+# Deliberate file list: never archive the workspace or original game recursively.
+$runtimeNames = @(
+    'avatar','belt_replica','building_replica','bootstrap','coop_runtime','coop_ui','game_adapter','game_bindings',
+    'guest_field','guest_presentation','guest_movement','guest_menus','held_replica','input_bridge','integration_probe','live_build_capture','local_transport','loose_sync',
+    'native_actor','native_network_check','network_controller','presence','prop_replica','protocol','locale','mod_version',
+    'runtime_probe','save_session','session','shared_settings','snapshot_transfer','steam_transport',
+    'tool_load_state','value_codec','world_sync'
+    'connection_status','marker_state','player_colors','preset_store','rejoin_state','shared_tools','update_checker','world_markers'
+)
+$files = @('Install.cmd','Remove.cmd','Installieren.cmd','Entfernen.cmd','README.md','README.en.md','README.de.md','THIRD_PARTY_NOTICES.txt','LICENSE','LICENSE.en.txt',
+    'tools/GameTarget.ps1','tools/Install.ps1','tools/Uninstall.ps1','tools/Setup.ps1','docs/playtest-checklist.md','docs/playtest-checklist.en.md')
+$files += @($runtimeNames | ForEach-Object { 'mods/ftn_coop/'+$_+'.gd' })
+foreach ($file in $files) {
+    if (-not (Test-Path -LiteralPath (Join-Path $projectRoot $file) -PathType Leaf)) { throw ('PACKAGE_FILE_MISSING: '+$file) }
+}
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$outputRoot = $artifacts.Directory
+New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
+$archivePath = $artifacts.Zip
+$temporaryPath = $archivePath+'.'+[guid]::NewGuid().ToString('N')+'.tmp'
+try {
+    $archive = [IO.Compression.ZipFile]::Open($temporaryPath,[IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($file in $files) {
+            $null = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive,(Join-Path $projectRoot $file),$file,[IO.Compression.CompressionLevel]::Optimal)
+        }
+    }
+    finally { $archive.Dispose() }
+    Move-Item -LiteralPath $temporaryPath -Destination $archivePath -Force
+}
+finally { if (Test-Path -LiteralPath $temporaryPath) { Remove-Item -LiteralPath $temporaryPath } }
+$digest = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+[IO.File]::WriteAllText($archivePath+'.sha256',$digest+'  '+[IO.Path]::GetFileName($archivePath)+[Environment]::NewLine)
+Write-Output ('Paket erstellt: '+$archivePath+' ('+$files.Count+' Dateien)')
