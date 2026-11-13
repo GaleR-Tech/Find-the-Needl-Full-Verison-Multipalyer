@@ -1,7 +1,8 @@
 extends Node
 
 signal completed(result: Dictionary)
-const ENDPOINT := "https://api.github.com/repos/GaleR-Tech/FTN-Coop-Full/releases/latest"
+# The numeric repository ID keeps this URL stable when the repository is renamed.
+const ENDPOINT := "https://api.github.com/repositories/1455470165/releases/latest"
 var _client: Node
 var _current := ""
 var _busy := false

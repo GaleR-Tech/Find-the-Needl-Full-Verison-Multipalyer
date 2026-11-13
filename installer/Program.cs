@@ -17,16 +17,16 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("FTN-Coop Full Game Setup")]
 [assembly: AssemblyProduct("FTN-Coop Full Game")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
+[assembly: AssemblyVersion("0.1.1.0")]
+[assembly: AssemblyFileVersion("0.1.1.0")]
 
 internal enum SetupLanguage { German, English }
 
 internal static class Program
 {
-    internal const string CurrentVersion = "0.1.0";
+    internal const string CurrentVersion = "0.1.1";
     internal const string SupportedBuild = "26547680";
-    internal const string ProjectUrl = "https://github.com/GaleR-Tech/FTN-Coop-Full";
+    internal const string ProjectUrl = "https://github.com/GaleR-Tech/Find-the-Needl-Full-Verison-Multipalyer";
     internal const string SupportUrl = "https://buymeacoffee.com/galertech";
     private const string SteamApp = "5160800";
     private const string InstallFormat = "FTN-Coop-Full-1";

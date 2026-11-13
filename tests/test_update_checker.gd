@@ -29,7 +29,8 @@ func run(tree: SceneTree) -> Array[String]:
 	var deadline := Time.get_ticks_msec()+2500
 	while results.is_empty() and Time.get_ticks_msec()<deadline: await tree.process_frame
 	if results.is_empty() or not results[0].ok or results[0].value.version!="0.3.10": errors.append("A real HTTP reply must reach the parsed update result.")
-	if client.request_count!=1 or client.requested_url!="https://api.github.com/repos/GaleR-Tech/FTN-Coop-Full/releases/latest" or checker.check().ok: errors.append("Requests must use the fixed public endpoint and respect the one-minute cooldown.")
+	if client.request_count!=1 or client.requested_url!="https://api.github.com/repositories/1455470165/releases/latest" or client.max_redirects!=0 or checker.check().ok:
+		errors.append("Use the fixed repository ID to survive renames with redirects disabled, and respect the one-minute cooldown.")
 	checker._process(60.0)
 	client.response_code = 429
 	checker.check()

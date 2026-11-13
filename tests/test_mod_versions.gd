@@ -11,7 +11,7 @@ func run(tree: SceneTree) -> Array[String]:
 		return ["Version mismatch needs safe local/lobby version details and an update hint."]
 	var errors: Array[String] = []
 	var version: Script = load("res://mods/ftn_coop/mod_version.gd")
-	if version.safe_version("0.4.0")!="0.4.0" or version.DOWNLOAD_URL!="https://github.com/GaleR-Tech/FTN-Coop-Full/releases":
+	if version.safe_version("0.4.0")!="0.4.0" or version.DOWNLOAD_URL!="https://github.com/GaleR-Tech/Find-the-Needl-Full-Verison-Multipalyer/releases":
 		errors.append("Version details must use exact versions and the project's fixed download page.")
 	for bad in [null,1,{},"https://evil.invalid","0.4.0\nPRIVATE_NAME","<script>","x".repeat(1000)]:
 		if not version.safe_version(bad).is_empty(): errors.append("Untrusted version text must not reach the update hint.")

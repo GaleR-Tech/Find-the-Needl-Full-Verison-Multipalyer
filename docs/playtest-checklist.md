@@ -1,13 +1,13 @@
 # FTN-Koop · Internettest noch offen
 
-Version 0.1.0 · Steam-Kaufversion, Build 26547680 · Stand 12.11.2026.
+Version 0.1.1 · Steam-Kaufversion, Build 26547680 · Stand 12.11.2026.
 Lokale echte Spielprozesse sind getrennt vom folgenden Internetnachweis zu bewerten.
 Niemand wurde automatisch angeschrieben oder eingeladen.
 
 ## Zuerst zwei Personen
 
 - [ ] Beide verwenden denselben Spiel-Build und dieselbe Mod-Version. Bei Linux zuerst den lokalen Proton-Test durchführen.
-- [ ] Eine ältere Mod-Version wird mit installierter/benötigter Version und Download-Link abgewiesen; nach Installation von 0.1.0 bei beiden und einem Neustart lässt sich der Beitritt erneut versuchen.
+- [ ] Eine ältere Mod-Version wird mit installierter/benötigter Version und Download-Link abgewiesen; nach Installation von 0.1.1 bei beiden und einem Neustart lässt sich der Beitritt erneut versuchen.
 - [ ] Beide starten über Steam mit verschiedenen Konten an verschiedenen Rechnern
       und Internetanschlüssen; Steam-Overlay ist verfügbar.
 - [ ] Host lädt einen eigenen Teststand, erstellt eine private Sitzung und lädt ein.
@@ -48,15 +48,15 @@ bei einem Fehler festhalten. Keine Kontozugangsdaten oder vollständigen Spielst
 in einen öffentlichen Bericht kopieren. Bis diese Liste mit echten Konten bestanden
 ist, bleibt der Internetbetrieb unbestätigt.
 
-## Linux-Prüfung für 0.1.0
+## Linux-Prüfung für 0.1.1
 
 - [ ] Heruntergeladenen Linux-Installer unter Ubuntu/Mint starten; beide Sprachen und einen Ordner mit Leerzeichen prüfen.
 - [ ] Installation, Update einer bestehenden Version und Entfernung testen; Spielstände, andere Mods und Original-Spiel-Dateien prüfen.
 - [ ] Die Kaufversion über Steam Proton starten; F2, Steam-Overlay, Einladungen und Laden der Welt prüfen.
-- [ ] Windows-Host/Linux-Gast und danach Linux-Host/Windows-Gast mit identischer Version 0.1.0 testen.
+- [ ] Windows-Host/Linux-Gast und danach Linux-Host/Windows-Gast mit identischer Version 0.1.1 testen.
 - [ ] Distribution, Python-Version, Proton-Version und Ergebnis festhalten. Diese Linux-Prüfungen sind noch offen.
 
-## Gaststeuerung und Weltabgleich in 0.1.0
+## Gaststeuerung und Weltabgleich in 0.1.1
 
 - [ ] Mit Umschalt bis zur leeren Ausdauer sprinten, loslassen und erholen; auch eine eigene Tastenbelegung testen.
 - [ ] Originalmenüs mit B / Tab / T / Escape öffnen: Bewegung ruht, Käufe belasten den Host genau einmal, Verlassen räumt die Sitzung auf.
@@ -66,7 +66,7 @@ ist, bleibt der Internetbetrieb unbestätigt.
 - [ ] Hosting mit ausgerüstetem Gastwerkzeug beenden; Host speichern und neu laden, Freischaltung bleibt vorhanden.
 - [ ] Bei Linux-Host-Absturz Proton-/Distributionsversion festhalten und lokal ein Proton-Protokoll erzeugen. Vor Weitergabe auf private Daten prüfen.
 
-## Rückfallprüfungen für 0.1.0
+## Rückfallprüfungen für 0.1.1
 
 - [ ] Host und Gast tragen gleichzeitig Heu mit getrennten Schaufeln/Mistgabeln; auf beiden Seiten ablegen und werfen, ohne die Last des anderen zu verändern.
 - [ ] Leeres Werkzeug ablegen: Die Kopie liegt am Boden, die Hand bleibt bis zur bewussten neuen Auswahl leer, auch bei Internetverzögerung.
@@ -78,7 +78,7 @@ ist, bleibt der Internetbetrieb unbestätigt.
 - [ ] Tor-Restzeit bei Host und Gast nach dem Beitritt und nach Host-Pause/Fortsetzen vergleichen. Die eigene Profilzeit des Gasts darf nicht überschrieben werden.
 - [ ] Beim Wiederabgleich dürfen alte unterwegs befindliche Weltmeldungen das normale Laden nicht neu starten. Fehlerbericht kopieren und den Abgleichgrund vor dem Teilen prüfen.
 
-## 0.1.0: Sendepuffer und native Heudarstellung
+## 0.1.1: Sendepuffer und native Heudarstellung
 
 - [ ] Der Host bewegt sich während des Gastbeitritts; der Gast erreicht das Spiel ohne erneuten normalen Ladebildschirm.
 - [ ] Mit langsamer Verbindung oder ungefähr 500 ms Verzögerung wiederholen; Käufe und Heuänderungen bleiben in Reihenfolge.
@@ -87,7 +87,7 @@ ist, bleibt der Internetbetrieb unbestätigt.
 - [ ] Host-Lobby neu erstellen und mit neuer Einladung beitreten. Eine alte geschlossene Lobby darf LOBBY_NOT_FOUND melden.
 - [ ] Mit Linux-/Proton-Host und getrennten Steam-Konten über das Internet wiederholen; diese Umgebungen sind durch die lokalen Windows-Prüfungen nicht bestätigt.
 
-## 0.1.0: Leistung, Schnellleiste und Werkzeugladung
+## 0.1.1: Leistung, Schnellleiste und Werkzeugladung
 
 - [ ] Bei gesperrten ausgeblendeten Werkzeugen wählen Zahlentasten das angezeigte Symbol, auch Förderband und Arm.
 - [ ] Schaufel und Heugabel zeigen bestätigte Menge/Kapazität und Voll-Hinweis; Leeren setzt die Anzeige zurück. Getragenes Heu folgt dem eigenen Werkzeug, abgelegtes Heu der Weltposition des Hosts.
@@ -95,7 +95,7 @@ ist, bleibt der Internetbetrieb unbestätigt.
 - [ ] Ohne Gast Heuaufnahme und Bandausgabe der Arme vor/nach Sitzungsstart vergleichen, mit offenem/geschlossenem F2. Stromversorgung und originalen Arm-Fehlerhinweis festhalten; prüfen, dass beladene Arme ihr Heu während der Sitzung bis zur Übergabe behalten.
 - [ ] Alle Gäste sehen die Ladung auf Förderbändern, Aufzügen und Heutreppen weiterwandern und nach dem Entfernen verschwinden. Dabei entstehen keine zusätzlichen Gegenstände neben der Maschine. Nach Umbau und Wiederbeitritt erneut prüfen.
 
-## 0.1.0: bestehende Welten, Heu in der Hand und Quests
+## 0.1.1: bestehende Welten, Heu in der Hand und Quests
 
 - [ ] Im betroffenen Spielstand Gast-Ping und Aktionsverzögerung mindestens eine Minute nach Beitritt vergleichen, mit denselben Spielern und laufender Fabrik. Gegenprobe in neuer Welt. Ein künstlicher Übertragungstest ist kein Internet-Ping-Ergebnis.
 - [ ] Heu in der normalen Hand tragen, laufen und drehen, danach werfen und ablegen. Hand, Schaufel, Gabel und getragene Gegenstände bei eingehenden Hostdaten auf Sprünge prüfen. Nach Loslassen müssen Besitzer und Weltposition eindeutig sein.

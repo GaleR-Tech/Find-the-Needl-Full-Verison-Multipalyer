@@ -1,5 +1,19 @@
 # Changelog / Änderungen
 
+## 0.1.1 · Update check / Updateprüfung
+
+### English
+
+- The F2 update check uses the permanent GitHub repository ID. It works after a repository rename without following redirects.
+- Download and project links point to the current public repository. The supported Steam build is 26547680.
+- If you have 0.1.0, download 0.1.1 from GitHub and install it manually. Restart the game after updating. Everyone in the session needs the same mod version.
+
+### Deutsch
+
+- Die Updateprüfung im F2-Menü nutzt die feste GitHub-Repository-ID. Sie funktioniert auch nach einer Umbenennung, ohne Weiterleitungen zu folgen.
+- Die Download- und Projektlinks führen zum aktuellen öffentlichen Repository. Unterstützt wird Steam-Build 26547680.
+- Wer 0.1.0 nutzt, lädt 0.1.1 manuell von GitHub herunter und startet das Spiel nach dem Update neu. Alle in der Sitzung brauchen dieselbe Mod-Version.
+
 ## 0.1.0 · Full game / Kaufversion
 
 ### English
