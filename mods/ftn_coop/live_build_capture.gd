@@ -67,6 +67,9 @@ func _copy_script(original: Script, arm: bool) -> Script:
 	_scripts[original] = script
 	return script
 
+func arm_copies() -> Array:
+	return _manager.get("robotic_arms") if is_instance_valid(_manager) else []
+
 func _mirror(source: Node, target: Node) -> void:
 	for property in source.get_script().get_script_property_list():
 		if (int(property.usage)&PROPERTY_USAGE_SCRIPT_VARIABLE)==0: continue

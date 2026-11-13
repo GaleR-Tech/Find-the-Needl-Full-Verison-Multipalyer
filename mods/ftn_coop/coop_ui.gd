@@ -77,6 +77,8 @@ const ERRORS := {
 	"SAVE_FAILED":"Der Spielstand konnte nicht gespeichert werden.",
 	"PEER_NOT_READY":"Warte, bis die Welt vollständig abgeglichen ist.",
 	"ACTION_REFUSED":"Diese Aktion ist gerade nicht möglich.",
+	"RECIPE_LOCKED":"Dieses Rezept ist noch nicht freigeschaltet.",
+	"PAYLOAD_TOO_LARGE":"Die Blaupause ist zu groß für die Koop-Übertragung.",
 }
 
 var _session: Node

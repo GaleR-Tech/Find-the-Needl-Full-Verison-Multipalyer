@@ -3,7 +3,7 @@ extends Node
 signal confirmed(event: Dictionary)
 signal resync_required
 
-const ACTIONS := ["dig","place","demolish","purchase","upgrade","needle_collect","item_interact","machine_config","menu_open"]
+const ACTIONS := ["dig","place","blueprint_place","demolish","purchase","upgrade","needle_collect","item_interact","machine_config","menu_open"]
 var revision := 0
 var is_host := false
 var action_captures_world := false

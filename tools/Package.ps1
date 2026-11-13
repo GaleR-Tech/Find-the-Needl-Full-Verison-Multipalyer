@@ -4,10 +4,10 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $artifacts = Get-FtnArtifactPaths -ProjectRoot $projectRoot
 # Deliberate file list: never archive the workspace or original game recursively.
 $runtimeNames = @(
-    'avatar','belt_replica','building_replica','bootstrap','coop_runtime','coop_ui','game_adapter','game_bindings',
-    'guest_field','guest_presentation','guest_movement','guest_menus','held_replica','input_bridge','integration_probe','live_build_capture','local_transport','loose_sync',
+    'avatar','avatar_emotes','belt_replica','building_replica','bootstrap','coop_runtime','coop_ui','game_adapter','game_bindings',
+    'guest_blueprints','guest_field','guest_presentation','guest_movement','guest_menus','guest_specialist_menus','held_replica','input_bridge','integration_probe','live_build_capture','local_transport','loose_sync',
     'native_actor','native_network_check','network_controller','presence','prop_replica','protocol','locale','mod_version',
-    'runtime_probe','save_session','session','shared_settings','snapshot_transfer','steam_transport',
+    'runtime_probe','save_session','session','shared_settings','snapshot_transfer','specialist_actions','steam_transport',
     'tool_load_state','value_codec','world_sync'
     'connection_status','marker_state','player_colors','preset_store','rejoin_state','shared_tools','update_checker','world_markers'
 )

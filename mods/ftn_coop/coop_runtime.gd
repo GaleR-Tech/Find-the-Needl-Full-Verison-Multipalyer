@@ -1,6 +1,7 @@
 extends Node
 
 const GameBindings = preload("res://mods/ftn_coop/game_bindings.gd")
+const GuestBlueprints = preload("res://mods/ftn_coop/guest_blueprints.gd")
 
 var network: Node
 var ui: CanvasLayer
@@ -26,6 +27,7 @@ var _update_client: Node
 var _world_markers: Node3D
 var _marker_requested := false
 var _marker_cooldown := 0.0
+var _blueprints := GuestBlueprints.new()
 
 func _init(update_client: Node=null) -> void: _update_client = update_client
 
@@ -86,7 +88,11 @@ func configure(adapter: RefCounted, transport: Node, build: String, version: Str
 	ui.action_requested.connect(_request)
 	input_bridge.action_requested.connect(_on_primary)
 	network.problem.connect(func(code: String): ui.show_error(code,network.version_mismatch))
+	network.action_result.connect(func(_sequence: int, ok: bool, code: String):
+		if not ok and code in ["RECIPE_LOCKED","PAYLOAD_TOO_LARGE","PLACEMENT_REFUSED"]: ui.show_error(code)
+	)
 	network.pose_received.connect(presence.apply_pose)
+	network.emote_received.connect(presence.apply_emote)
 	network.markers_changed.connect(func(_rows: Array): _refresh_marker_display())
 	network.player_status_changed.connect(ui.set_player_status)
 	network.session.roster_changed.connect(_roster_changed)
@@ -347,6 +353,12 @@ func _on_primary(kind: String, payload: Dictionary) -> void:
 	if kind=="dig":
 		var pose: Dictionary = _adapter.read_local_pose()
 		if pose.ok and pose.value.get("tool")==GameBindings.BUILD_TOOL:
+			var player: Node = _adapter.local_player_body()
+			if _blueprints.in_hand(player):
+				var placement: Dictionary = _blueprints.placement_payload(player)
+				if placement.ok: _request("blueprint_place",placement.value)
+				else: ui.show_error(placement.code)
+				return
 			var selected: String = _adapter.selected_build_id() if _adapter.has_method("selected_build_id") else _selected_build
 			if payload.get("pressed")==true and not selected.is_empty(): _request("place",{"id":selected})
 			return
@@ -383,7 +395,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _input(event: InputEvent) -> void:
-	if network==null or not network.session.is_host or network.session.state!=network.session.State.PLAYING or not ui.actions_allowed(): return
+	if network==null or network.session.state!=network.session.State.PLAYING or not ui.actions_allowed(): return
+	if _is_guest():
+		if not guest_menus.blocks_gameplay() and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED and event.is_pressed() and not event.is_echo():
+			if _blueprints.handle_input(_adapter.local_player_body(),event): get_viewport().set_input_as_handled()
+		return
+	if not network.session.is_host: return
 	if not event is InputEventKey or not event.pressed or event.echo or not InputMap.has_action("interact") or not event.is_action_pressed("interact"): return
 	if Input.mouse_mode!=Input.MOUSE_MODE_CAPTURED or get_tree().paused: return
 	if _adapter.has_method("try_shared_tool_pickup") and _adapter.try_shared_tool_pickup(_adapter.local_player_body()):

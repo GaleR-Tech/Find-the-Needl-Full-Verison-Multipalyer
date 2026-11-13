@@ -20,6 +20,9 @@ func sync_roster(local_peer: int, roster: Dictionary) -> void:
 func apply_pose(peer: int, pose: Dictionary) -> void:
 	if avatars.has(peer): avatars[peer].apply_pose(pose)
 
+func apply_emote(peer: int, id: String, serial: int) -> void:
+	if avatars.has(peer): avatars[peer].apply_emote(id,serial)
+
 func clear() -> void:
 	for avatar in avatars.values(): avatar.queue_free()
 	avatars.clear()

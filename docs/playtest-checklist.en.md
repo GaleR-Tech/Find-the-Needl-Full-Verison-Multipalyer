@@ -108,3 +108,9 @@ accounts, Internet play remains unverified.
 - [ ] Guests switch hotbar pages and keep their selection when the host changes pages.
 - [ ] Quest checklist rows advance on all guests. Check scrap jams, buyers, depot stock and case goals.
 - [ ] Check blueprints, water and power connections, advanced production, and a new hay delivery in a copied late-game save.
+
+## 0.2.0 guest menus and emotes
+
+- [ ] Join with a blueprint saved on the guest. Select it in the build catalogue, rotate it, and place it. Check the host's charge and the new buildings on all players. Rejoin and check that the blueprint group is still present.
+- [ ] Change a recipe, withdraw a depot item, rename a power line and toggle a water pump in the original menus. Check that the host and guests see the confirmed changes.
+- [ ] Walk, sprint, crouch and jump, then wave using the game's emote binding. Check the other player's animation on both sides. Check the optional rude-emote setting on the viewing client.

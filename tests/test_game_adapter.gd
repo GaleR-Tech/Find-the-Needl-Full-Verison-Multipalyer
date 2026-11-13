@@ -127,6 +127,15 @@ func run(tree: SceneTree) -> Array[String]:
 		sign_row.p.at = "invalid"
 		if fresh._snapshot_valid(snapshot) or fresh._patch_valid({"buildings":[sign_row]}):
 			errors.append("A fixture requires a native placement vector.")
+		var group := {"type":"blueprint_groups","groups":[{"id":1,"bp":"guest-deck","name":"Deck / North","at":Vector3.ZERO,"mk":1,"members":[["deck",Vector3.ONE]]}]}
+		var plugs := {"type":"power_plugs","off":[],"pins":[[Vector3.ZERO,Vector3.ONE]]}
+		var pole := {"type":"power_pole","position":Vector3.ONE,"line_name":"North / Yard"}
+		snapshot.buildings = [group,plugs,pole]
+		if not fresh._snapshot_valid(snapshot) or not fresh._patch_valid({"buildings":snapshot.buildings}):
+			errors.append("Native infrastructure and blueprint metadata must survive joining and live updates.")
+		plugs.pins = [["not a position",Vector3.ONE]]
+		if fresh._snapshot_valid(snapshot) or fresh._patch_valid({"buildings":snapshot.buildings}):
+			errors.append("Malformed power pin data must be refused before native restore.")
 		builds.free()
 		fresh.nodes.erase("builds")
 		fresh.nodes.erase("tech")

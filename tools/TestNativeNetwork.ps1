@@ -9,12 +9,14 @@ param(
     [switch]$Headless,
     [ValidateRange(-1,3)][int]$GraphicalPeer = -1,
     [switch]$SeedBeltWitness,
+    [switch]$SpecialistMenus,
     [string]$ModSource = ''
 )
 $ErrorActionPreference = 'Stop'
 if ($Headless -and $Presence) { throw 'Presence checks inspect native draw nodes and require a graphical runtime. Omit -Headless.' }
 if ($GraphicalPeer -ge 0 -and (-not $Headless -or $GraphicalPeer -ge $Players -or $PerformanceSeconds -lt 30)) { throw 'GraphicalPeer requires a valid peer index, -Headless and a performance scenario.' }
 if ($SeedBeltWitness -and $PerformanceSeconds -lt 30) { throw 'SeedBeltWitness requires a performance scenario.' }
+if ($SpecialistMenus -and $PerformanceSeconds -lt 30) { throw 'SpecialistMenus requires a performance scenario.' }
 $workspaceRoot = Split-Path -Parent $PSScriptRoot
 if ($ModSource -eq '') { $ModSource = Join-Path $workspaceRoot 'mods\ftn_coop' }
 if (-not (Test-Path -LiteralPath (Join-Path $ModSource 'bootstrap.gd') -PathType Leaf)) { throw 'Missing mod source.' }
@@ -77,6 +79,18 @@ function Test-NativeAgreement($Reports) {
     return @{ ok=$true; mismatch=$false; counts=$matchingCounts }
 }
 
+function Get-NativeLogErrors {
+    foreach ($logPath in $nativeLogPaths) {
+        if (-not (Test-Path -LiteralPath $logPath)) { continue }
+        $lines = @(Get-Content -LiteralPath $logPath)
+        for ($index=0; $index -lt $lines.Count; $index++) {
+            if ($lines[$index] -notmatch 'SCRIPT ERROR:|^ERROR:') { continue }
+            if ($lines[$index] -eq 'ERROR: Parameter "material" is null.' -and $index+1 -lt $lines.Count -and $lines[$index+1] -match 'servers\\rendering\\dummy\\storage\\material_storage\.cpp') { continue }
+            $lines[$index]
+        }
+    }
+}
+
 $previousTestOutput = [Environment]::GetEnvironmentVariable('FTN_COOP_TEST_OUTPUT','Process')
 [Environment]::SetEnvironmentVariable('FTN_COOP_TEST_OUTPUT',$nativeReportDir.Replace('\','/'),'Process')
 try {
@@ -103,6 +117,7 @@ for ($nativeIndex=0; $nativeIndex -lt $Players; $nativeIndex++) {
         Copy-Item -LiteralPath (Join-Path $privateModDir 'native_network_check.gd') -Destination (Join-Path $privateModDir 'native_integrity_check.gd')
         Copy-Item -LiteralPath (Join-Path $workspaceRoot 'tests\native_performance_check.gd') -Destination (Join-Path $privateModDir 'native_network_check.gd')
         Copy-Item -LiteralPath (Join-Path $workspaceRoot 'tests\native_render_witness.gd') -Destination (Join-Path $privateModDir 'native_render_witness.gd')
+        if ($SpecialistMenus) { Copy-Item -LiteralPath (Join-Path $workspaceRoot 'tests\native_specialist_witness.gd') -Destination $privateModDir }
         if ($nativeIndex -eq 0) { Copy-Item -LiteralPath $SaveFile -Destination (Join-Path $privateGameDir 'performance-slot.dat') }
     }
     $privateUserName = 'FTN-Coop-Native-' + $nativeRunId + '-' + $nativeIndex
@@ -135,6 +150,7 @@ for ($nativeIndex=0; $nativeIndex -lt $Players; $nativeIndex++) {
     if ($Persistence) { $launchArguments += '--ftn-coop-save-check' }
     if ($PerformanceSeconds -gt 0) { $launchArguments += ('--ftn-performance-seconds='+$PerformanceSeconds) }
     if ($SeedBeltWitness) { $launchArguments += '--ftn-seed-belt-witness' }
+    if ($SpecialistMenus) { $launchArguments += '--ftn-specialist-menus' }
     if ($peerHeadless) { $launchArguments = @('--headless','--audio-driver','Dummy') + $launchArguments }
     $nativeProcesses += Start-Process -FilePath (Join-Path $privateGameDir 'FindTheNeedle.exe') -ArgumentList $launchArguments -WorkingDirectory $privateGameDir -WindowStyle Hidden -PassThru
     if ($nativeIndex -lt ($Players-1)) {
@@ -167,7 +183,7 @@ while ((Get-Date) -lt $nativeDeadline) {
         if ($nativeAgreement.mismatch) { $nativeFailure = 'State mismatch for ' + $nativeAgreement.peer + ' at revision ' + $nativeAgreement.revision; break }
         if ($nativeAgreement.ok) { break }
     }
-    $scriptErrors = @(Select-String -LiteralPath $nativeLogPaths -Pattern 'SCRIPT ERROR:|^ERROR:' -ErrorAction SilentlyContinue)
+    $scriptErrors = @(Get-NativeLogErrors)
     if ($scriptErrors.Count -gt 0) { $nativeFailure = 'Native log contains a script or engine error.'; break }
     $anyExited = @($nativeProcesses | Where-Object { $_.HasExited })
     if ($anyExited.Count -gt 0) { $nativeFailure = 'A native process exited before completion.'; break }
@@ -179,7 +195,7 @@ if ($nativeFailure -eq '' -and $ReviewSeconds -gt 0) {
     Start-Sleep -Seconds $ReviewSeconds
 }
 [IO.File]::WriteAllText((Join-Path $nativeReportDir 'stop.request'),'stop')
-$closeDeadline = (Get-Date).AddSeconds($(if ($Persistence) { 50 } else { 20 }))
+$closeDeadline = (Get-Date).AddSeconds($(if ($Persistence -or $SpecialistMenus) { 55 } else { 20 }))
 while ((Get-Date) -lt $closeDeadline -and @($nativeProcesses | Where-Object { -not $_.HasExited }).Count -gt 0) { Start-Sleep -Milliseconds 200 }
 foreach ($nativeProcess in $nativeProcesses | Where-Object { -not $_.HasExited }) {
     $ownedProcess = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $nativeProcess.Id)
@@ -197,7 +213,7 @@ foreach ($reportName in $nativeNames) {
         $nativeFailure = 'Final native check did not pass: ' + $reportName + ' ' + $finalReport.code
     }
 }
-$scriptErrors = @(Select-String -LiteralPath $nativeLogPaths -Pattern 'SCRIPT ERROR:|^ERROR:' -ErrorAction SilentlyContinue)
+$scriptErrors = @(Get-NativeLogErrors)
 if ($scriptErrors.Count -gt 0 -and $nativeFailure -eq '') { $nativeFailure = 'Native log contains a script or engine error.' }
 if ($Presence -and $nativeFailure -eq '') {
     $loadWitnesses = @($nativeNames | Where-Object { $_ -ne 'host' } | ForEach-Object { Read-NativeReport $_ } | Where-Object {

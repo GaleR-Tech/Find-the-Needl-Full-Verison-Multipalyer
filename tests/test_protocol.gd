@@ -139,4 +139,24 @@ func run(_tree: SceneTree) -> Array[String]:
 		if protocol.encode(invalid).code != "INVALID_PAYLOAD": errors.append("Invalid envelopes must be rejected.")
 	for invalid in ['["f",1e9999]', '["v3",[0,0]]', '["i","9223372036854775808"]', '["s","\\ud800"]', '["u8","===="]']:
 		if protocol.decode(invalid.to_utf8_buffer()).code != "INVALID_PAYLOAD": errors.append("Malformed typed data must fail safely.")
+	_emote_checks(protocol,codec,errors)
 	return errors
+
+func _emote_checks(protocol: RefCounted, codec: RefCounted, errors: Array[String]) -> void:
+	var event := {"protocol":1,"type":"EMOTE","session":"0123456789abcdef0123456789abcdef","body":{"id":"wave","serial":7}}
+	var sent: Dictionary = protocol.encode(event)
+	if not sent.ok or protocol.decode(sent.value).value!=event: errors.append("A native emote transition must round-trip.")
+	for bad in [event.body.merged({"id":"../../anything"},true), event.body.merged({"serial":0},true), event.body.merged({"peer":"host"}), event.body.merged({"extra":true})]:
+		var invalid := event.merged({"body":bad},true)
+		var raw: Dictionary = codec.encode(invalid,65536)
+		if protocol.encode(invalid).ok or protocol.decode(raw.value).ok: errors.append("Malformed emote IDs, sequence values and fields must be rejected at both wire boundaries.")
+	var pose := {"position":Vector3.ZERO,"rotation":Vector3.ZERO,"motion":Vector3(4.0,0.3,1.0)}
+	var movement := event.merged({"type":"POSE","body":{"pose":pose,"serial":9}},true)
+	if not protocol.encode(movement).ok: errors.append("An ordinary movement packet may include validated native locomotion state.")
+	for bad in [
+		{"motion":Vector3(0,NAN,0)},
+		{"motion":Vector3(4.0,0.3,2.0)},
+		{"emote_sample":{"serial":7,"bones":PackedVector4Array([Vector4(0,0,0,1)])}},
+	]:
+		movement.body.pose = pose.merged(bad,true)
+		if protocol.encode(movement).ok: errors.append("Malformed locomotion or bone samples must never reach a remote model.")

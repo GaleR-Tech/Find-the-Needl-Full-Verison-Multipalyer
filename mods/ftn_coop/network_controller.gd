@@ -2,6 +2,7 @@ extends Node
 
 signal problem(code: String)
 signal pose_received(peer_id: int, pose: Dictionary)
+signal emote_received(peer_id: int, id: String, serial: int)
 signal stopped
 signal action_result(sequence: int, ok: bool, code: String)
 signal load_progress(stage: String, received_bytes: int, total_bytes: int)
@@ -11,6 +12,8 @@ signal player_status_changed(rows: Dictionary)
 const COMPRESS_EVENT_BYTES := 2048
 const SEND_PACKETS_PER_FRAME := 48
 const SEND_BYTES_PER_PEER := 65536
+const Protocol = preload("res://mods/ftn_coop/protocol.gd")
+const AvatarEmotes = preload("res://mods/ftn_coop/avatar_emotes.gd")
 
 var session: Node
 var world_sync: Node
@@ -57,6 +60,9 @@ var _pose_serial := 0
 var _last_pose_serial: Dictionary = {}
 var _activity_at: Dictionary = {}
 var _queued_poses: Dictionary = {}
+var _local_emote := ""
+var _emote_serial := 0
+var _emotes: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -141,6 +147,9 @@ func leave() -> void:
 	_equipment_epochs.clear()
 	_pose_serial = 0
 	_last_pose_serial.clear()
+	_local_emote = ""
+	_emote_serial = 0
+	_emotes.clear()
 	_activity_at.clear()
 	_sync_wait = 0.0
 	_receiver.cancel()
@@ -165,6 +174,7 @@ func _on_state_changed() -> void:
 	if _leaving: return
 	if not session.is_host:
 		if session.state==session.State.SYNCING:
+			_local_emote = ""
 			_sync_wait = 0.0
 			load_progress.emit("waiting",0,0)
 		elif session.state==session.State.PLAYING: load_progress.emit("ready",0,0)
@@ -237,12 +247,14 @@ func _process(delta: float) -> void:
 				_fail(_adapter.last_sync_error)
 				return
 		elif not session.is_host: _adapter.pump_guest_visuals()
+		_poll_local_emote()
 		if _pose_due>=1.0/15.0 and pose_stream_enabled and _adapter.has_method("read_local_pose"):
 			_pose_due = 0.0
 			var pose: Dictionary = _adapter.read_local_pose()
 			if pose.ok:
-				if session.is_host: _broadcast_pose(1,pose.value)
-				else: _queue(1,"POSE",{"pose":_local_equipment_pose(pose.value)},false)
+				var movement := _with_emote_sample(pose.value)
+				if session.is_host: _broadcast_pose(1,movement)
+				else: _queue(1,"POSE",{"pose":_local_equipment_pose(movement)},false)
 	for peer in _pending.keys():
 		_pending[peer].age += delta
 		if _pending[peer].age>120.0: _fail("TRANSFER_TIMEOUT",peer)
@@ -350,6 +362,7 @@ func _on_message(peer: int, channel: int, bytes: PackedByteArray) -> void:
 					# No pieces of the replaced baseline may remain in our queue.
 					_discard_packets(peer)
 					session.roster[peer].state = "syncing"
+					if _emotes.has(peer): _emotes[peer].id = ""
 					world_sync.set_ready(peer,false)
 					_start_world(peer)
 			"ACTION":
@@ -382,8 +395,12 @@ func _on_message(peer: int, channel: int, bytes: PackedByteArray) -> void:
 				if _adapter.has_method("update_actor_pose"):
 					if not _update_actor_pose(peer,body.pose).ok: return
 				if body.pose.get("position") is Vector3 and body.pose.position.is_finite(): _peer_positions[peer] = body.pose.position
-				pose_received.emit(peer,body.pose)
-				_broadcast_pose(peer,body.pose)
+				var movement := _checked_emote_sample(peer,body.pose)
+				pose_received.emit(peer,movement)
+				_broadcast_pose(peer,movement)
+			"EMOTE":
+				if body.has("peer") or session.roster[peer].state!="playing": return
+				if _accept_emote(peer,body): _broadcast_emote(peer,body.id,body.serial)
 		return
 	if peer!=1: return
 	if message.type=="REJECT":
@@ -430,7 +447,12 @@ func _on_message(peer: int, channel: int, bytes: PackedByteArray) -> void:
 				if _transport.has_method("set_loading"): _transport.set_loading(1,false)
 		"ROSTER": session.accept_welcome(1,{"session_id":session.session_id,"player_id":_transport.local_peer_id(),"roster":body.get("roster"),"mod_version":_mod_version})
 		"POSE":
-			if typeof(body.get("peer"))==TYPE_INT and body.get("pose") is Dictionary and session.roster.has(body.peer) and _accept_pose_serial(peer,body): pose_received.emit(body.peer,body.pose)
+			if typeof(body.get("peer"))==TYPE_INT and body.get("pose") is Dictionary and session.roster.has(body.peer) and _accept_pose_serial(peer,body):
+				pose_received.emit(body.peer,_checked_emote_sample(body.peer,body.pose))
+		"EMOTE":
+			var actor: int = body.get("peer",0)
+			if session.state!=session.State.PLAYING or actor==_transport.local_peer_id() or not session.roster.has(actor) or session.roster[actor].state!="playing": return
+			_accept_emote(actor,body)
 		"ACTION_RESULT":
 			if typeof(body.get("sequence"))!=TYPE_INT or body.sequence<=0 or not body.get("ok") is bool or not body.get("code") is String: return
 			if body.ok and body.sequence>_last_equipment_sequence and body.get("equipment") is Dictionary and _adapter.has_method("apply_local_equipment"):
@@ -446,6 +468,43 @@ func _local_equipment_pose(pose: Dictionary) -> Dictionary:
 	tagged.equipment_epoch = _last_equipment_sequence
 	return tagged
 
+func _poll_local_emote() -> void:
+	if not _adapter.has_method("read_local_emote"): return
+	var id: String = _adapter.read_local_emote()
+	if id==_local_emote or not Protocol.valid_emote(id): return
+	var serial := _emote_serial+1
+	if session.is_host:
+		_emotes[1] = {"id":id,"serial":serial}
+		_broadcast_emote(1,id,serial)
+	elif not _queue(1,"EMOTE",{"id":id,"serial":serial}).ok: return
+	_emote_serial = serial
+	_local_emote = id
+
+func _with_emote_sample(pose: Dictionary) -> Dictionary:
+	if _local_emote.is_empty() or not _adapter.has_method("local_emote_hands"): return pose
+	var hands: Node3D = _adapter.local_emote_hands()
+	var bones := AvatarEmotes.capture(hands)
+	if bones.is_empty(): return pose
+	return pose.merged({"emote_sample":{"serial":_emote_serial,"bones":bones}},true)
+
+func _checked_emote_sample(peer: int, pose: Dictionary) -> Dictionary:
+	if not pose.has("emote_sample"): return pose
+	var record: Dictionary = _emotes.get(peer,{})
+	if not record.get("id","").is_empty() and record.get("serial")==pose.emote_sample.serial: return pose
+	var movement := pose.duplicate()
+	movement.erase("emote_sample")
+	return movement
+
+func _accept_emote(peer: int, body: Dictionary) -> bool:
+	var previous: Dictionary = _emotes.get(peer,{})
+	if body.serial<=int(previous.get("serial",0)): return false
+	var now := Time.get_ticks_msec()
+	var last_start: int = previous.get("start",-1000)
+	if session.is_host and not body.id.is_empty() and now-last_start<120: return false
+	_emotes[peer] = {"id":body.id,"serial":body.serial,"start":last_start if body.id.is_empty() else now}
+	emote_received.emit(peer,body.id,body.serial)
+	return true
+
 func _accept_pose_serial(peer: int, body: Dictionary) -> bool:
 	var actor: int = peer if session.is_host else body.peer
 	if typeof(body.get("serial"))!=TYPE_INT or body.serial<=int(_last_pose_serial.get(actor,0)): return false
@@ -457,6 +516,7 @@ func _update_actor_pose(peer: int, pose: Dictionary) -> Dictionary:
 	if typeof(epoch)!=TYPE_INT or epoch<0 or epoch>9007199254740991: return _error("POSE_INVALID")
 	var confirmed := pose.duplicate()
 	confirmed.erase("equipment_epoch")
+	confirmed.erase("emote_sample")
 	# Movement uses a separate unreliable channel. A late packet must not undo
 	# a host-confirmed purchase/drop while its result is reaching the guest.
 	if epoch<int(_equipment_epochs.get(peer,0)): confirmed.erase("tool")
@@ -565,6 +625,10 @@ func _finish_world(peer: int, body: Dictionary) -> void:
 		world_sync.set_ready(peer,true)
 		_world_retries.erase(peer)
 		session.mark_world_ready(peer)
+		for actor in _emotes:
+			var emote: Dictionary = _emotes[actor]
+			if actor!=peer and not emote.id.is_empty() and session.roster.has(actor) and session.roster[actor].state=="playing":
+				_queue(peer,"EMOTE",{"peer":actor,"id":emote.id,"serial":emote.serial})
 		if _transport.has_method("set_loading"): _transport.set_loading(peer,false)
 		_publish_collaboration()
 		return
@@ -644,6 +708,8 @@ func _request_resync(reason: String="") -> void:
 func _on_roster_changed() -> void:
 	for actor in _last_pose_serial.keys():
 		if not session.roster.has(actor): _last_pose_serial.erase(actor)
+	for actor in _emotes.keys():
+		if not session.roster.has(actor): _emotes.erase(actor)
 	if not session.is_host or _leaving: return
 	for departed in _peer_stages.keys():
 		if not session.roster.has(departed):
@@ -656,6 +722,10 @@ func _on_roster_changed() -> void:
 func _broadcast_pose(peer: int, pose: Dictionary) -> void:
 	for target in session.roster:
 		if target!=1 and target!=peer and session.roster[target].state=="playing": _queue(target,"POSE",{"peer":peer,"pose":pose},false)
+
+func _broadcast_emote(peer: int, id: String, serial: int) -> void:
+	for target in session.roster:
+		if target!=1 and target!=peer and session.roster[target].state=="playing": _queue(target,"EMOTE",{"peer":peer,"id":id,"serial":serial})
 
 func _on_disconnected(peer: int) -> void:
 	if _leaving: return
@@ -679,6 +749,7 @@ func _on_disconnected(peer: int) -> void:
 	world_sync.remove_peer(peer)
 	_equipment_epochs.erase(peer)
 	_last_pose_serial.erase(peer)
+	_emotes.erase(peer)
 	_adapter.remove_actor(peer)
 	if session.is_host: _publish_collaboration()
 

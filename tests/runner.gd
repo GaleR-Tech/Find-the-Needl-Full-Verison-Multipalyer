@@ -15,6 +15,8 @@ const SUITES := {
 	"prop_replica": "res://tests/test_prop_replica.gd",
 	"shared_tools": "res://tests/test_shared_tools.gd",
 	"guest_menus": "res://tests/test_guest_menus.gd",
+	"guest_blueprints": "res://tests/test_guest_blueprints.gd",
+	"specialist_actions": "res://tests/test_specialist_actions.gd",
 	"collaboration_ui": "res://tests/test_collaboration_ui.gd",
 	"rejoin": "res://tests/test_rejoin.gd",
 	"update_checker": "res://tests/test_update_checker.gd",

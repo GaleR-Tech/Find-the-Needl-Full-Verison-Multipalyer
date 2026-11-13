@@ -106,3 +106,9 @@ ist, bleibt der Internetbetrieb unbestätigt.
 - [ ] Gäste wechseln die Schnellleisten-Seite und behalten ihre Auswahl bei Seitenwechseln des Hosts.
 - [ ] Die Quest-Checkliste schreitet bei allen Gästen voran. Schrottstaus, Käufer, Depotbestand und Schrankziel prüfen.
 - [ ] Blaupausen, Wasser- und Stromanschlüsse, spätere Produktionsstufen und eine neue Heulieferung mit einer Spielstandkopie prüfen.
+
+## Gastmenüs und Emotes in 0.2.0
+
+- [ ] Mit einer beim Gast gespeicherten Blaupause beitreten. Sie im Baukatalog auswählen, drehen und platzieren. Abbuchung beim Host und Gebäude bei allen prüfen. Nach Wiederbeitritt die Baugruppe prüfen.
+- [ ] In den Originalmenüs ein Rezept wechseln, Material aus dem Depot nehmen, eine Stromleitung umbenennen und eine Wasserpumpe schalten. Bestätigte Änderungen bei Host und Gästen prüfen.
+- [ ] Gehen, sprinten, ducken, springen und über die Spielbelegung winken. Die Animation der anderen Figur auf beiden Seiten prüfen. Die Anzeige derben Gesten hängt von der Einstellung des Zuschauers ab.

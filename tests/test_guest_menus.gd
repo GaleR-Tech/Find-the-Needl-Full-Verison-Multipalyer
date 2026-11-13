@@ -39,15 +39,48 @@ class PauseMenu extends Menu:
 	func _on_exit_to_title() -> void: left_locally = true
 	func _on_save() -> void: pass
 
+class Machine extends Node3D:
+	var switched_off := false
+	var recipe := ""
+
+class MachineMenu extends Control:
+	var _switch := Button.new()
+	var _recipe := Button.new()
+	var _machine: Machine
+	func _init() -> void:
+		add_child(_switch)
+		add_child(_recipe)
+		_switch.pressed.connect(_on_switch)
+		_recipe.pressed.connect(_on_recipe.bind("sample"))
+	func open(target: Machine) -> void: _machine = target
+	func is_open() -> bool: return is_instance_valid(_machine)
+	func machine() -> Node3D: return _machine
+	func close() -> void: _machine = null
+	func _on_switch() -> void: _machine.switched_off = not _machine.switched_off
+	func _on_recipe(id: String) -> void: _machine.recipe = id
+
+class Player extends Node:
+	var machine_panel := MachineMenu.new()
+	var target := Machine.new()
+	func _init() -> void:
+		add_child(machine_panel)
+		add_child(target)
+	func _console_under() -> Node3D: return target
+	func _open_console(machine: Machine) -> bool:
+		machine_panel.open(machine)
+		return true
+
 class World extends Node:
 	var catalog_panel := Menu.new()
 	var tech_panel := TechMenu.new()
 	var pause_menu := PauseMenu.new()
+	var player := Player.new()
 	func _init() -> void:
 		process_mode = Node.PROCESS_MODE_DISABLED
 		add_child(catalog_panel)
 		add_child(tech_panel)
 		add_child(pause_menu)
+		add_child(player)
 
 func run(tree: SceneTree) -> Array[String]:
 	if not FileAccess.file_exists("res://mods/ftn_coop/guest_menus.gd"):
@@ -99,6 +132,26 @@ func run(tree: SceneTree) -> Array[String]:
 		errors.append("Closing a guest session must restore native panel behavior.")
 	world.tech_panel._ins_buy.pressed.emit()
 	if world.tech_panel.money!=90.0 or requests.size()!=2: errors.append("Guest request hooks must be removed on teardown.")
+	bridge.bind_world(world)
+	bridge.active = true
+	var machine_menu := world.player.machine_panel
+	var machine := world.player.target
+	if not bridge.has_method("open_interaction") or not bridge.open_interaction():
+		errors.append("Guests must be able to open the original machine console.")
+	else:
+		machine_menu._switch.pressed.emit()
+		machine_menu._recipe.pressed.emit()
+		if not bridge.blocks_gameplay() or machine.switched_off or not machine.recipe.is_empty():
+			errors.append("The open machine console must block gameplay and avoid local machine changes.")
+		if requests.size()!=4 or requests[2][0]!="machine_config" or requests[2][1].get("value")!=true or requests[3][1].get("value")!="sample":
+			errors.append("Switch and recipe buttons must forward their native values to the host.")
+		await press(tree,KEY_ESCAPE)
+		if machine_menu.is_open(): errors.append("Escape must close a specialist console.")
+		bridge.detach()
+		machine_menu.open(machine)
+		machine_menu._switch.pressed.emit()
+		if not machine.switched_off: errors.append("The native switch must be restored after leaving a guest session.")
+		machine_menu.close()
 	# Resync frees the old scene before the menu bridge binds the replacement.
 	bridge.bind_world(world)
 	bridge.active = true

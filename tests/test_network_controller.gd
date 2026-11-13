@@ -47,6 +47,10 @@ class RejectTransport extends "res://tests/fixtures/fake_transport.gd":
 class FullTransfer extends Node:
 	func buffer_event(_event: Dictionary) -> Dictionary: return {"ok":false,"code":"RESYNC_REQUIRED","value":null}
 
+class EmoteBoundary extends "res://tests/fixtures/network_game_boundary.gd":
+	var emote := ""
+	func read_local_emote() -> String: return emote
+
 class TrafficTransport extends "res://tests/fixtures/fake_transport.gd":
 	var messages: Array[Dictionary] = []
 	var blocked := false
@@ -518,7 +522,6 @@ func _four_socket_peers(tree: SceneTree) -> Array[String]:
 	if not FileAccess.file_exists("res://mods/ftn_coop/local_transport.gd"): return ["Real socket group transport is missing."]
 	var module: Script = load("res://mods/ftn_coop/network_controller.gd")
 	var transport: Script = load("res://mods/ftn_coop/local_transport.gd")
-	var boundary: Script = load("res://tests/fixtures/network_game_boundary.gd")
 	var controllers: Array[Node] = []
 	var wires: Array[Node] = []
 	var games: Array = []
@@ -527,7 +530,7 @@ func _four_socket_peers(tree: SceneTree) -> Array[String]:
 	for index in range(4):
 		var wire: Node = transport.new()
 		wire.port = port
-		var game: RefCounted = boundary.new()
+		var game := EmoteBoundary.new()
 		game.tree = tree
 		var controller: Node = module.new()
 		tree.root.add_child(wire)
@@ -554,6 +557,7 @@ func _four_socket_peers(tree: SceneTree) -> Array[String]:
 		if controllers[0].session.roster.size()!=4: errors.append("Real sockets must retain exactly four admitted participants.")
 		for index in [1,2,3]:
 			if games[index].world!=games[0].world: errors.append("Every socket replica must match shared money and production after late join.")
+		errors.append_array(await _check_emote_routing(tree,controllers,wires,games))
 		var departed: int = wires[2].local_peer_id()
 		controllers[2].leave()
 		await tree.create_timer(0.1).timeout
@@ -587,6 +591,43 @@ func _four_socket_peers(tree: SceneTree) -> Array[String]:
 		controller.queue_free()
 	for wire in wires: wire.queue_free()
 	await tree.process_frame
+	return errors
+
+func _check_emote_routing(tree: SceneTree, controllers: Array[Node], wires: Array[Node], games: Array) -> Array[String]:
+	for controller in controllers:
+		if not controller.has_signal("emote_received"): return ["Native emote transitions must reach the other players through the session."]
+	var received: Array[Array] = [[],[],[],[]]
+	for index in range(4):
+		var inbox := received[index]
+		controllers[index].emote_received.connect(func(peer: int, id: String, _serial: int): inbox.append([peer,id]))
+		controllers[index].pose_stream_enabled = false
+	var guest_id: int = wires[1].local_peer_id()
+	games[1].emote = "wave"
+	await tree.create_timer(0.18).timeout
+	games[1].emote = ""
+	await tree.create_timer(0.18).timeout
+	var errors: Array[String] = []
+	for index in [0,2,3]:
+		if received[index]!=[[guest_id,"wave"],[guest_id,""]]: errors.append("A guest's emote start and stop must reach each other player exactly once with its real peer ID.")
+	if not received[1].is_empty(): errors.append("A guest must keep playing its own first-person emote without a second network copy.")
+	games[0].emote = "salute"
+	await tree.create_timer(0.18).timeout
+	if received[1]!=[[1,"salute"]] or received[2].back()!=[1,"salute"] or received[3].back()!=[1,"salute"]:
+		errors.append("A native host emote must reach all three guests.")
+	var codec: RefCounted = load("res://mods/ftn_coop/protocol.gd").new()
+	var session_id: String = controllers[0].session.session_id
+	var connection: String = controllers[1].connection_id
+	for invalid in [
+		{"id":"__invalid_emote","serial":8},
+		{"id":"wave","serial":2},
+		{"id":"wave","serial":8,"peer":1},
+	]:
+		var body: Dictionary = invalid.merged({"_connection":connection})
+		var packet: Dictionary = codec.encode({"protocol":1,"type":"EMOTE","session":session_id,"body":body})
+		if packet.ok: wires[1].send(1,0,packet.value,true)
+	await tree.create_timer(0.18).timeout
+	if received[0]!=[[guest_id,"wave"],[guest_id,""]]: errors.append("A guest may not spoof an emote ID or source or replay an old transition.")
+	for controller in controllers: controller.pose_stream_enabled = true
 	return errors
 
 func _await_playing(tree: SceneTree, controllers: Array) -> bool:

@@ -54,6 +54,8 @@ func _physics_process(delta: float) -> void:
 	if Input.mouse_mode!=Input.MOUSE_MODE_CAPTURED: return
 	var movement := Vector2(int(_pressed("move_right",KEY_D))-int(_pressed("move_left",KEY_A)),int(_pressed("move_back",KEY_S))-int(_pressed("move_forward",KEY_W)))
 	step(delta,movement,_pressed("jump",KEY_SPACE),_pressed("sprint",KEY_SHIFT))
+	if enabled and is_instance_valid(_player) and _player.has_method("_apply_crouch"):
+		_player.call("_apply_crouch",delta)
 
 func _pressed(action: String, fallback: int) -> bool:
 	return Input.is_action_pressed(action) if InputMap.has_action(action) else Input.is_physical_key_pressed(fallback)

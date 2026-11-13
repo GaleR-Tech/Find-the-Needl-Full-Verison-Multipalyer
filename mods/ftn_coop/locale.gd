@@ -2,6 +2,8 @@ extends RefCounted
 
 const SETTINGS := "user://ftn_coop/settings.cfg"
 const EN := {
+	"Dieses Rezept ist noch nicht freigeschaltet.":"This recipe has not been unlocked yet.",
+	"Die Blaupause ist zu groß für die Koop-Übertragung.":"This blueprint is too large to transfer in co-op.",
 	"Markierung":"Point",
 	"Hier bauen":"Build here",
 	"Hier liegt eine Nadel":"Needle here",

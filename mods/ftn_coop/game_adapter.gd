@@ -4,6 +4,7 @@ const MODULE_DIR := "res://mods/ftn_coop"
 const GameBindings = preload("res://mods/ftn_coop/game_bindings.gd")
 const HOTBAR_FIELDS := ["hotbar", "hotbar_page", "hotbar_pages"]
 const SAVE_MODE_FIELDS := ["current_sandbox", "current_cozy", "new_run_tutorial"]
+const BUILD_METADATA := ["blueprint_groups","power_tags","power_plugs","splitter_routes"]
 
 const SCRIPT_PATHS := {
 	"cfg": "res://autoload/cfg.gd",
@@ -43,6 +44,8 @@ var _shared_tools_scope: RefCounted
 var _props_replica: RefCounted
 var _local_peer := 0
 var _guest_countdown: Dictionary = {}
+var _emote_player := 0
+var _emote_hands: Node3D
 var _countdown_world_id := 0
 var _guest_field: RefCounted
 var _guest_view: RefCounted
@@ -245,7 +248,25 @@ func read_local_pose() -> Dictionary:
 	var pose := {"position":player.global_position,"rotation":rotation}
 	var tool: Variant = player.get("current_tool")
 	if typeof(tool)==TYPE_INT: pose.tool = tool
+	if player is CharacterBody3D and player.has_method("crouch_amount"):
+		var speed := Vector2(player.velocity.x,player.velocity.z).length()
+		var air := 0.0 if player.is_on_floor() else (-1.0 if player.velocity.y < -1.0 else 1.0)
+		pose.motion = Vector3(minf(speed,24.0),clampf(float(player.call("crouch_amount")),0.0,1.0),air)
 	return {"ok":true,"code":"OK","value":pose}
+
+func local_emote_hands() -> Node3D:
+	const EMOTES := "res://scripts/player/emotes.gd"
+	var player := local_player_body()
+	if player==null: return null
+	var id := player.get_instance_id()
+	if _emote_player!=id:
+		_emote_player = id
+		_emote_hands = load(EMOTES).hands_of(player) if ResourceLoader.exists(EMOTES) else null
+	return _emote_hands if is_instance_valid(_emote_hands) else null
+
+func read_local_emote() -> String:
+	var hands := local_emote_hands()
+	return String(hands.call("emote_id")) if is_instance_valid(hands) else ""
 
 func set_local_spawn(transform: Transform3D) -> Dictionary:
 	if not nodes.has("player") or not _safe_native_data(transform,0) or transform.origin.length()>2048.0: return _error("POSE_INVALID")
@@ -599,7 +620,7 @@ func host_action_captures_world() -> bool:
 	return true
 
 func apply_host_action(actor_id: int, kind: String, payload: Dictionary) -> Dictionary:
-	if kind not in ["dig","place","demolish","purchase","upgrade","needle_collect","item_interact","machine_config","menu_open"]: return _error("ACTION_INVALID")
+	if kind not in ["dig","place","blueprint_place","demolish","purchase","upgrade","needle_collect","item_interact","machine_config","menu_open"]: return _error("ACTION_INVALID")
 	if guest_mode: return _error("HOST_ONLY")
 	if not actors.has(actor_id) or not is_instance_valid(actors[actor_id]): return _error("ACTOR_NOT_READY")
 	var actor: Node = actors[actor_id]
@@ -619,7 +640,9 @@ func apply_host_action(actor_id: int, kind: String, payload: Dictionary) -> Dict
 	if frame.is_empty(): return _error(last_sync_error if not last_sync_error.is_empty() else "WORLD_NOT_READY")
 	var patch := _difference(_previous_frame,frame)
 	_previous_frame = frame
-	return _ok({"kind":kind,"actor":actor_id,"patch":patch})
+	var event := {"kind":kind,"actor":actor_id,"patch":patch}
+	if kind=="blueprint_place": event.blueprint_id = result.value
+	return _ok(event)
 
 func _perform_action(actor: Node, kind: String, payload: Dictionary) -> Dictionary:
 	match kind:
@@ -672,6 +695,8 @@ func _perform_action(actor: Node, kind: String, payload: Dictionary) -> Dictiona
 			var status: Dictionary = actor.get("build").call("status")
 			if status.get("ok") != true: return _error("PLACEMENT_REFUSED")
 			actor.get("build").call("primary")
+		"blueprint_place":
+			return load(MODULE_DIR+"/guest_blueprints.gd").new().apply_host(actor,payload)
 		"demolish":
 			var tool: Node = actor.get("build")
 			var target: Variant = tool.call("dismantle_target")
@@ -715,6 +740,8 @@ func _perform_action(actor: Node, kind: String, payload: Dictionary) -> Dictiona
 				"throw": actor.call("throw_active_tool")
 				_: return _error("ACTION_INVALID")
 		"machine_config":
+			if payload.has("operation"):
+				return load(MODULE_DIR+"/specialist_actions.gd").apply(actor,nodes.world,nodes.builds,payload)
 			if not payload.get("switched_off") is bool: return _error("ACTION_INVALID")
 			var machine: Variant = actor.call("_console_under")
 			if not machine is Node3D: machine = actor.call("_scanner_under")
@@ -1117,7 +1144,7 @@ func _snapshot_records_valid(state: Dictionary) -> bool:
 	var checked_strings := {}
 	for row in state.buildings:
 		if not row is Dictionary or not row.get("type") is String or row.type.is_empty() or row.type.length()>128: return false
-		if row.type!="fixture":
+		if row.type!="fixture" and row.type not in BUILD_METADATA:
 			if row.has("position"):
 				if not row.position is Vector3: return false
 			elif not row.get("a") is Vector3 or not row.get("b") is Vector3: return false
@@ -1216,6 +1243,8 @@ func apply_confirmed_event(event: Dictionary) -> Dictionary:
 		if not holds.ok: return _error("SNAPSHOT_INVALID")
 		_loose_module().accept_holds(holds.value)
 	if patch.has("tool_loads"): _tool_loads().accept(patch.tool_loads)
+	if event.get("kind")=="blueprint_place" and event.get("actor")==_local_peer and event.get("blueprint_id") is String:
+		load(MODULE_DIR+"/guest_blueprints.gd").new().confirm_placement(local_player_body(),event.blueprint_id)
 	timings.cargo_and_loose = Time.get_ticks_usec()-stamp
 	last_apply_timings = timings
 	return _ok()
@@ -1241,6 +1270,7 @@ func apply_guest_buildings(records: Array) -> Dictionary:
 	nodes.builds.set("restore_slice_usec",0)
 	nodes.builds.call("from_array",records)
 	nodes.builds.set("restore_slice_usec",slice)
+	if nodes.builds.has_method("_rewire_now"): nodes.builds.call("_rewire_now")
 	_guest_buildings = records.duplicate(true)
 	return _ok()
 
@@ -1476,11 +1506,42 @@ func _patch_valid(patch: Dictionary) -> bool:
 
 func _safe_building_record(row: Dictionary, depth: int, checked_strings: Dictionary) -> bool:
 	var data := row
+	match row.get("type"):
+		"power_tags", "splitter_routes":
+			var names: Variant = row.get("names")
+			if not names is Array and not names is PackedStringArray: return false
+			if names.size()!=8: return false
+			for label in names:
+				if not _safe_display_text(label,32): return false
+			data = row.duplicate()
+			data.erase("names")
+		"power_plugs":
+			if not row.get("pins") is Array or not row.get("off") is Array: return false
+			for pin in row.pins:
+				if not pin is Array or pin.size()!=2 or not pin[0] is Vector3 or not pin[1] is Vector3: return false
+			for at in row.off:
+				if not at is Vector3: return false
+		"power_pole":
+			if row.has("line_name"):
+				if not _safe_display_text(row.line_name,128): return false
+				data = row.duplicate()
+				data.erase("line_name")
+	if row.get("type")=="blueprint_groups":
+		if row.size()!=2 or not row.get("groups") is Array or row.groups.size()>32768: return false
+		data = {"type":row.type,"groups":[]}
+		for group in row.groups:
+			if not group is Dictionary or not _safe_display_text(group.get("name"),128): return false
+			if not group.get("id") is int or not group.get("bp") is String or not group.get("at") is Vector3 or not group.get("mk") is int or not group.get("members") is Array: return false
+			for member in group.members:
+				if not member is Array or member.size()!=2 or not member[0] is String or not member[1] is Vector3: return false
+			var fields: Dictionary = group.duplicate()
+			fields.erase("name")
+			data.groups.append(fields)
 	if row.get("type")=="fixture":
 		var kind: Variant = row.get("kind")
 		var params: Variant = row.get("p")
 		if not kind is String or kind.is_empty() or kind.length()>128 or not params is Dictionary or not params.get("at") is Vector3: return false
-		if kind=="sign" and params.has("text"):
+		if kind in ["sign","yard_sign"] and params.has("text"):
 			# The native sign's text is rendered as a label. Keep the usual
 			# resource-path checks on its icon, type, and every other field.
 			var text: Variant = params.text
@@ -1489,6 +1550,9 @@ func _safe_building_record(row: Dictionary, depth: int, checked_strings: Diction
 			data.p = params.duplicate()
 			data.p.erase("text")
 	return _safe_native_data(data,depth,checked_strings)
+
+func _safe_display_text(value: Variant, limit: int) -> bool:
+	return value is String and value.length()<=limit and not value.to_utf8_buffer().has(0)
 
 func _safe_native_data(value: Variant, depth: int, checked_strings: Dictionary={}) -> bool:
 	if depth > 32: return false

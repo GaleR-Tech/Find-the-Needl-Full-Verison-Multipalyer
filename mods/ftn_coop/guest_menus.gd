@@ -10,6 +10,7 @@ var _modes: Array[Dictionary] = []
 var _hooks: Array[Dictionary] = []
 var _disabled: Array[Dictionary] = []
 var _open_states := {}
+var _specialists: RefCounted = preload("res://mods/ftn_coop/guest_specialist_menus.gd").new()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -25,6 +26,7 @@ func bind_world(world: Node) -> bool:
 			return false
 		_panels.append(panel)
 	_world = world
+	_specialists.bind_world(world, _specialist_action)
 	for panel in _panels:
 		_modes.append({"node":panel,"mode":panel.process_mode,"input":panel.is_processing_input(),"unhandled":panel.is_processing_unhandled_input(),"keys":panel.is_processing_unhandled_key_input()})
 		panel.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -77,11 +79,13 @@ func _disable(button: BaseButton) -> void:
 	button.disabled = true
 
 func blocks_gameplay() -> bool:
+	if _specialists.blocks_gameplay(): return true
 	for panel in _panels:
 		if is_instance_valid(panel) and panel.call("is_open"): return true
 	return false
 
 func close_panels() -> void:
+	_specialists.close()
 	for panel in _panels:
 		if is_instance_valid(panel) and panel.call("is_open"): panel.call("set_open",false)
 
@@ -91,6 +95,16 @@ func _typing() -> bool:
 
 func _input(event: InputEvent) -> void:
 	if not active or not is_instance_valid(_world) or _panels.size()!=3: return
+	var stock_menu_open := false
+	for panel in _panels:
+		if panel.call("is_open"): stock_menu_open = true
+	if not stock_menu_open and _specialists.handle_input(event):
+		get_viewport().set_input_as_handled()
+		return
+	if _specialists.blocks_gameplay() and event is InputEventKey and event.pressed and not event.echo and _typing(): return
+	if not blocks_gameplay() and not _typing() and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED and not event.is_echo() and event.is_action_pressed("interact") and open_interaction():
+		get_viewport().set_input_as_handled()
+		return
 	if _panels[1].call("is_open") and event.is_action_pressed("ui_accept") and not _typing():
 		_buy_selected()
 		get_viewport().set_input_as_handled()
@@ -139,6 +153,7 @@ func _card_input(event: InputEvent, original: Callable, id: String) -> void:
 	else: original.call(event)
 
 func _process(_delta: float) -> void:
+	if active: _specialists.refresh()
 	for panel in _panels:
 		if is_instance_valid(panel): panel.set_process_input(false)
 	for index in range(mini(2,_panels.size())):
@@ -154,6 +169,7 @@ func _process(_delta: float) -> void:
 func detach() -> void:
 	active = false
 	close_panels()
+	_specialists.detach()
 	for hook in _hooks:
 		if not is_instance_valid(hook.node): continue
 		if hook.node.is_connected(hook.signal,hook.replacement): hook.node.disconnect(hook.signal,hook.replacement)
@@ -175,3 +191,9 @@ func detach() -> void:
 
 func _exit_tree() -> void:
 	detach()
+
+func open_interaction() -> bool:
+	return active and _specialists.open_interaction()
+
+func _specialist_action(kind: String, payload: Dictionary) -> void:
+	if active: action_requested.emit(kind,payload)

@@ -38,6 +38,7 @@ var _measure_at := 0
 var _duration := 60
 var _snapshot_loads := 0
 var _seed_belt_witness := false
+var _specialist: RefCounted
 var _join_ms := 0
 
 func _ready() -> void: process_mode = Node.PROCESS_MODE_ALWAYS
@@ -53,6 +54,7 @@ func run(base: String, args: PackedStringArray) -> Dictionary:
 	_checks.render_backend = DisplayServer.get_name()
 	_duration = _argument(args,"--ftn-performance-seconds=","60").to_int()
 	_seed_belt_witness = args.has("--ftn-seed-belt-witness")
+	if args.has("--ftn-specialist-menus"): _specialist = load(base+"/native_specialist_witness.gd").new()
 	_directory = OS.get_environment("FTN_COOP_TEST_OUTPUT").replace("\\","/")
 	_adapter = load(base+"/performance_adapter.gd").new()
 	_adapter.bind(get_tree().root)
@@ -75,6 +77,7 @@ func run(base: String, args: PackedStringArray) -> Dictionary:
 		_adapter.nodes.world.set("block_save",false)
 		saves.set("block_save",false)
 		_adapter.update_shared_setting("autosave",false)
+		if _specialist!=null: _specialist.seed(_adapter)
 		_checks.loaded_state = _adapter.nodes.state.call("to_dict")
 		_checks.loaded_buildings = _adapter._live_frame().buildings.size()
 		_checks.loaded_props = _adapter.nodes.props.call("to_array").size()
@@ -96,6 +99,12 @@ func run(base: String, args: PackedStringArray) -> Dictionary:
 	add_child(_runtime)
 	_runtime.configure(_adapter,_transport,game_build,str(load(base+"/bootstrap.gd").get_script_constant_map().get("VERSION","")))
 	_network = _runtime.network
+	if _specialist!=null:
+		_network.emote_received.connect(func(peer: int, id: String, _serial: int):
+			if id!="wave": return
+			var avatar: Node3D = _runtime.presence.avatars.get(peer)
+			if is_instance_valid(avatar) and is_instance_valid(avatar._body): _checks.specialist_remote_wave = true
+		)
 	_network.problem.connect(func(code: String):
 		if not FileAccess.file_exists(_directory+"/stop.request"): _fatal = code
 	)
@@ -145,6 +154,12 @@ func _guest_actions() -> void:
 			break
 	while _read("host").get("stage")!="measuring" and _fatal.is_empty():
 		await get_tree().create_timer(0.1).timeout
+	if _specialist!=null and _index==1:
+		var proof: Dictionary = await _specialist.exercise(self,_adapter,_runtime)
+		_checks.specialist = proof
+		if not proof.ok:
+			_fatal = "SPECIALIST_"+str(proof.code)
+			return
 	_measure_at = Time.get_ticks_msec()
 	_stage = "measuring"
 	_adapter.perf.clear()
@@ -281,6 +296,7 @@ func _process(_delta: float) -> void:
 		for index in range(1,_count):
 			if _read("guest-"+str(index)).get("stage")!="actions_done": complete = false
 		if complete:
+			if _specialist!=null and not _checks.get("specialist_remote_wave",false): _fatal = "SPECIALIST_REMOTE_WAVE"
 			_done = true
 			_stage = "actions_done"
 			_write("RUNNING")
