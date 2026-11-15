@@ -224,7 +224,8 @@ func _ready() -> void:
 	_settings_box = VBoxContainer.new()
 	box.add_child(_settings_box)
 	_settings_hint = _label(_settings_box,"")
-	var labels := {"prop_cap":"Lose Objekte: Maximum","prop_decay":"Lose Objekte automatisch entfernen","belt_cap":"Förderband-Objekte: Maximum","belt_decay":"Förderband-Objekte automatisch entfernen","auto_clean":"Automatisch aufräumen","auto_clean_seconds":"Aufräumintervall (Sekunden)","scrap_jams":"Staus durch Schrott","grid_lock":"Am Bauraster ausrichten","autosave":"Automatisch speichern (Host)","autosave_seconds":"Speicherintervall (Sekunden)"}
+	var labels := {"prop_cap":"Lose Objekte: Maximum","prop_decay":"Lose Objekte automatisch entfernen",
+		"scrap_cap":"Schrottlimit","scrap_decay":"Schrott automatisch entfernen","tuft_cap":"Limit für lose Heubüschel","belt_cap":"Förderband-Objekte: Maximum","belt_decay":"Förderband-Objekte automatisch entfernen","auto_clean":"Automatisch aufräumen","auto_clean_metal":"Metall automatisch aufräumen","auto_clean_seconds":"Aufräumintervall (Sekunden)","scrap_jams":"Staus durch Schrott","grid_lock":"Am Bauraster ausrichten","autosave":"Automatisch speichern (Host)","autosave_seconds":"Speicherintervall (Sekunden)"}
 	var schema: Dictionary = load(get_script().resource_path.get_base_dir()+"/shared_settings.gd").SCHEMA
 	for key in schema: _setting_row(key,labels[key],schema[key])
 	_label(_settings_box,"Einstellungsvorlagen")

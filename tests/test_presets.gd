@@ -1,6 +1,6 @@
 extends RefCounted
 
-const VALUES := {"prop_cap":300,"prop_decay":false,"belt_cap":1000,"belt_decay":true,"auto_clean":true,"auto_clean_seconds":90.0,"scrap_jams":true,"grid_lock":true,"autosave":false,"autosave_seconds":300.0}
+const VALUES := {"scrap_cap":400,"scrap_decay":false,"tuft_cap":35,"auto_clean_metal":false,"prop_cap":300,"prop_decay":false,"belt_cap":1000,"belt_decay":true,"auto_clean":true,"auto_clean_seconds":90.0,"scrap_jams":true,"grid_lock":true,"autosave":false,"autosave_seconds":300.0}
 
 func run(_tree: SceneTree) -> Array[String]:
 	if not FileAccess.file_exists("res://mods/ftn_coop/preset_store.gd"): return ["Durable gameplay presets are missing."]
@@ -48,6 +48,11 @@ func run(_tree: SceneTree) -> Array[String]:
 	if store.list_names().ok or store.save_preset("Friends",VALUES).ok or FileAccess.get_file_as_string(path)!="broken": errors.append("Corrupt data must be reported without overwriting it.")
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(path+".bak")
+	var legacy := VALUES.duplicate()
+	for key in ["scrap_cap","scrap_decay","tuft_cap","auto_clean_metal"]: legacy.erase(key)
+	if not store._write({"Old friends":legacy}).ok or store.load_preset("Old friends").get("value")!=legacy:
+		errors.append("Presets from 0.2.0 must load without imposing defaults for the new gameplay settings.")
+	DirAccess.remove_absolute(path)
 	var cfg: Node = load("res://tests/fixtures/game_config.gd").new()
 	var settings: RefCounted = load("res://mods/ftn_coop/shared_settings.gd").new()
 	settings.configure(cfg)

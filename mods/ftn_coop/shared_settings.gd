@@ -4,15 +4,21 @@ extends RefCounted
 const SCHEMA := {
 	"prop_cap":[TYPE_INT,20,1500],
 	"prop_decay":[TYPE_BOOL],
+	"scrap_cap":[TYPE_INT,20,1000],
+	"scrap_decay":[TYPE_BOOL],
+	"tuft_cap":[TYPE_INT,5,100],
 	"belt_cap":[TYPE_INT,20,5000],
 	"belt_decay":[TYPE_BOOL],
 	"auto_clean":[TYPE_BOOL],
+	"auto_clean_metal":[TYPE_BOOL],
 	"auto_clean_seconds":[TYPE_FLOAT,15.0,600.0],
 	"scrap_jams":[TYPE_BOOL],
 	"grid_lock":[TYPE_BOOL],
 	"autosave":[TYPE_BOOL],
 	"autosave_seconds":[TYPE_FLOAT,60.0,1800.0],
 }
+
+const ADDED_DEFAULTS := {"scrap_cap":100,"scrap_decay":true,"tuft_cap":15,"auto_clean_metal":true}
 
 var _config: Node
 var _original: Dictionary = {}
@@ -36,6 +42,14 @@ func validate(values: Variant) -> Dictionary:
 		if rule.size()>1 and (value<rule[1] or value>rule[2]): return _error("SETTINGS_INVALID")
 		normalized[key] = value
 	return _ok(normalized)
+
+func validate_preset(values: Variant) -> Dictionary:
+	if not values is Dictionary or values.size()!=SCHEMA.size()-ADDED_DEFAULTS.size(): return validate(values)
+	# A 0.2.0 preset leaves the new settings at their current host values.
+	var checked := validate(ADDED_DEFAULTS.merged(values,true))
+	if not checked.ok: return checked
+	for key in ADDED_DEFAULTS: checked.value.erase(key)
+	return checked
 
 func capture() -> Dictionary:
 	if not _available(): return _error("CAPABILITY_MISSING")

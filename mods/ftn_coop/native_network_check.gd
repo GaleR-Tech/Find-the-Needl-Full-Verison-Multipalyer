@@ -40,7 +40,7 @@ var _offline_directory := ""
 var _settings_original: Dictionary = {}
 var _expected_disconnect := false
 var _collaboration_running := false
-const TEST_SETTINGS := {"prop_cap":300,"prop_decay":true,"belt_cap":600,"belt_decay":true,"auto_clean":false,"auto_clean_seconds":90.0,"scrap_jams":true,"grid_lock":false,"autosave":false,"autosave_seconds":180.0}
+const TEST_SETTINGS := {"scrap_cap":400,"scrap_decay":false,"tuft_cap":35,"auto_clean_metal":false,"prop_cap":300,"prop_decay":true,"belt_cap":600,"belt_decay":true,"auto_clean":false,"auto_clean_seconds":90.0,"scrap_jams":true,"grid_lock":false,"autosave":false,"autosave_seconds":180.0}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS

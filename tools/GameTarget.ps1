@@ -26,8 +26,8 @@ function Resolve-FtnGameDirectory {
         throw 'GAME_FOLDER_INVALID: The selected folder does not match Steam app 5160800.'
     }
     $build = [regex]::Match($content, '(?m)^[ \t]*"buildid"[ \t]+"([0-9]+)"[ \t]*\r?$').Groups[1].Value
-    if ($RequireSupportedBuild -and $build -ne '26547680') {
-        throw 'GAME_BUILD_UNSUPPORTED: This installer supports Steam build 26547680.'
+    if ($RequireSupportedBuild -and $build -ne '26646592') {
+        throw 'GAME_BUILD_UNSUPPORTED: This installer supports Steam build 26646592.'
     }
     Assert-FtnPlainPath $root.FullName
     foreach ($name in 'mods','mods/ftn_coop','mods/ftn_coop/install-state.json','override.cfg') {

@@ -22,9 +22,11 @@ func exercise(check: Node, adapter: RefCounted, runtime: Node) -> Dictionary:
 	var tree := check.get_tree()
 	var result := {}
 	for scenario in [["assembler.gd","production_panel.gd","_on_recipe","motor", "recipe","motor"],
-		["depot.gd","depot_panel.gd","_on_take","", "paper_roll",4],
-		["power_pole.gd","pole_panel.gd","_finish_naming","", "line_name","Coop test"],
-		["pipe_pump.gd","water_panel.gd","_on_switch","", "is_switched_off",true]]:
+		["depot.gd","depot_panel.gd","_on_take",null, "paper_roll",4],
+		["depot.gd","depot_panel.gd","_on_keep_choice",false, "depot_refuse",true],
+		["depot.gd","depot_panel.gd","_on_drone_choice",false, "depot_drone_skip",true],
+		["power_pole.gd","pole_panel.gd","_finish_naming",null, "line_name","Coop test"],
+		["pipe_pump.gd","water_panel.gd","_on_switch",null, "is_switched_off",true]]:
 		var target := _fixture(builds,scenario[0])
 		if target==null: return _error("FIXTURE_"+scenario[0],result)
 		player.global_position = target.global_position+Vector3(0,0,2.5)
@@ -32,7 +34,19 @@ func exercise(check: Node, adapter: RefCounted, runtime: Node) -> Dictionary:
 		await tree.physics_frame
 		if not menus._open_target(target): return _error("OPEN_"+scenario[0],result)
 		var panel: Node = menus._watched
-		if scenario[0]=="depot.gd": panel.call("_on_pick","paper_roll")
+		if scenario[0]=="depot.gd":
+			panel.call("_on_pick","paper_roll")
+			menus._hook_tree(panel)
+		if scenario[0]=="assembler.gd":
+			var paste := _button(menus,"settings_buttons.gd","_on_paste",null)
+			if paste==null or not paste.disabled: return _error("MACHINE_PASTE",result)
+			var before: int = runtime.network._sequence
+			paste.pressed.emit()
+			if runtime.network._sequence!=before: return _error("MACHINE_PASTE_SENT",result)
+			result.machine_paste_host_only = true
+		var depot_refresh := [false]
+		var depot_changed := func(): depot_refresh[0] = true
+		if scenario[4]=="depot_drone_skip": adapter.nodes.state.depot_changed.connect(depot_changed)
 		var sequence: int = runtime.network._sequence+1
 		if scenario[0]=="power_pole.gd":
 			panel.call("_on_name_line")
@@ -43,6 +57,8 @@ func exercise(check: Node, adapter: RefCounted, runtime: Node) -> Dictionary:
 			var button := _button(menus,scenario[1],scenario[2],scenario[3])
 			if button==null: return _error("BUTTON_"+scenario[0],result)
 			button.pressed.emit()
+			if scenario[4]=="depot_refuse" and target.call("refuses","paper_roll"): return _error("DEPOT_REFUSE_LOCAL",result)
+			if scenario[4]=="depot_drone_skip" and adapter.nodes.state.call("drones_skip","paper_roll"): return _error("DEPOT_DRONE_LOCAL",result)
 		var status: Dictionary = await _wait_result(check,sequence)
 		if not status.ok: return _error(scenario[0]+"_"+status.code,result)
 		var actual: Variant
@@ -53,11 +69,16 @@ func exercise(check: Node, adapter: RefCounted, runtime: Node) -> Dictionary:
 			match scenario[4]:
 				"recipe": actual = target.get("recipe")
 				"paper_roll": actual = adapter.nodes.state.call("depot_count","paper_roll")
+				"depot_refuse": actual = target.call("refuses","paper_roll")
+				"depot_drone_skip": actual = adapter.nodes.state.call("drones_skip","paper_roll")
 				"line_name": actual = target.get("line_name")
 				"is_switched_off": actual = target.call("is_switched_off")
 			if actual==scenario[5]: break
 		if actual!=scenario[5]: return _error("REPLICA_"+scenario[0]+"_"+str(actual),result)
-		result[scenario[0]] = actual
+		if scenario[4]=="depot_drone_skip":
+			adapter.nodes.state.depot_changed.disconnect(depot_changed)
+			if not depot_refresh[0]: return _error("DEPOT_DRONE_REFRESH",result)
+		result[scenario[4]] = actual
 		menus.close()
 	var at := Vector3(16,0,19)
 	player.global_position = at+Vector3(0,0,3)
@@ -122,12 +143,12 @@ func _fixture(builds: Node, file: String) -> Node3D:
 		if target.get_script().resource_path.get_file()==file and target.global_position.distance_to(FIXTURES[file])<0.1: return target
 	return null
 
-func _button(menus: RefCounted, file: String, method: String, argument: String) -> BaseButton:
+func _button(menus: RefCounted, file: String, method: String, argument: Variant) -> BaseButton:
 	for record in menus._hooks:
 		if not is_instance_valid(record.node) or not record.node is BaseButton or record.signal!="pressed": continue
 		var original: Callable = record.original
 		if not original.is_valid() or original.get_method()!=method or original.get_object().get_script().resource_path.get_file()!=file: continue
-		if not argument.is_empty() and original.get_bound_arguments()!=[argument]: continue
+		if argument!=null and original.get_bound_arguments()!=[argument]: continue
 		return record.node
 	return null
 

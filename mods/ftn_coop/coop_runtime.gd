@@ -212,7 +212,11 @@ func _apply_preset(name: String) -> void:
 		ui.show_error(loaded.code)
 		return
 	if not _adapter.has_method("update_shared_settings"): return
-	var result: Dictionary = _adapter.update_shared_settings(loaded.value)
+	var current: Dictionary = _adapter.read_shared_settings()
+	if not current.ok:
+		ui.show_error(current.code)
+		return
+	var result: Dictionary = _adapter.update_shared_settings(current.value.merged(loaded.value,true))
 	if not result.ok: ui.show_error(result.code)
 	else:
 		ui.set_shared_settings(result.value)

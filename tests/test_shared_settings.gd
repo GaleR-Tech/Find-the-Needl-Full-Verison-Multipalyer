@@ -1,6 +1,6 @@
 extends RefCounted
 
-const HOST := {"prop_cap":300,"prop_decay":false,"belt_cap":1000,"belt_decay":false,"auto_clean":true,"auto_clean_seconds":90.0,"scrap_jams":true,"grid_lock":true,"autosave":false,"autosave_seconds":300.0}
+const HOST := {"scrap_cap":400,"scrap_decay":false,"tuft_cap":35,"auto_clean_metal":false,"prop_cap":300,"prop_decay":false,"belt_cap":1000,"belt_decay":false,"auto_clean":true,"auto_clean_seconds":90.0,"scrap_jams":true,"grid_lock":true,"autosave":false,"autosave_seconds":300.0}
 
 func run(tree: SceneTree) -> Array[String]:
 	if not FileAccess.file_exists("res://mods/ftn_coop/shared_settings.gd"):
@@ -13,11 +13,11 @@ func run(tree: SceneTree) -> Array[String]:
 	var module: RefCounted = load("res://mods/ftn_coop/shared_settings.gd").new()
 	module.configure(cfg)
 	var captured: Dictionary = module.capture()
-	if not captured.ok or captured.value.size()!=10 or captured.value.get("prop_cap")!=150 or captured.value.get("scrap_jams")!=false or captured.value.has("quality"):
+	if not captured.ok or captured.value.size()!=14 or captured.value.get("prop_cap")!=150 or captured.value.get("scrap_jams")!=false or captured.value.has("quality"):
 		errors.append("The host snapshot must include scrap jams with the other gameplay settings and exclude personal preferences.")
 	var original: Dictionary = captured.value.duplicate(true)
 	var accepted: Dictionary = module.accept(HOST)
-	if not accepted.ok or not cfg.settings_readonly or cfg.prop_cap!=300 or not cfg.scrap_jams or not cfg.grid_lock or cfg.quality!=2 or cfg.mouse_sensitivity!=0.7:
+	if not accepted.ok or not cfg.settings_readonly or cfg.prop_cap!=300 or cfg.scrap_cap!=400 or cfg.scrap_decay or cfg.tuft_cap!=35 or cfg.auto_clean_metal or not cfg.scrap_jams or not cfg.grid_lock or cfg.quality!=2 or cfg.mouse_sensitivity!=0.7:
 		errors.append("Accepting host settings must lock only gameplay values while preserving personal controls and graphics.")
 	cfg.quality = 1
 	cfg.mouse_sensitivity = 0.5
@@ -52,7 +52,7 @@ func run(tree: SceneTree) -> Array[String]:
 	for key in ["quality","locale","override_file","unknown"]:
 		if module.update_host(key,1).ok:
 			errors.append("The shared editing path must reject personal and unknown keys.")
-	for entry in [["prop_cap",19],["prop_cap",1501],["prop_cap",25.5],["belt_cap",5001],["auto_clean",1],["scrap_jams",1],["auto_clean_seconds",NAN],["autosave_seconds",1801.0]]:
+	for entry in [["prop_cap",19],["prop_cap",1501],["prop_cap",25.5],["belt_cap",5001],["scrap_cap",1001],["scrap_decay",1],["tuft_cap",4],["auto_clean_metal",1],["auto_clean",1],["scrap_jams",1],["auto_clean_seconds",NAN],["autosave_seconds",1801.0]]:
 		var invalid := HOST.duplicate(true)
 		invalid[entry[0]] = entry[1]
 		if module.accept(invalid).ok or cfg.settings_readonly or cfg.prop_cap!=250:

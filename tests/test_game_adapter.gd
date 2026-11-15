@@ -57,9 +57,9 @@ func run(tree: SceneTree) -> Array[String]:
 		return ["Purchase-edition compatibility is not registered yet."]
 	if not bindings.verified_evidence("unknown-build").is_empty():
 		errors.append("An untested build must not inherit verified bindings.")
-	if not bindings.check_evidence(bindings.verified_evidence("26547680")).get("ok", false):
+	if not bindings.check_evidence(bindings.verified_evidence("26646592")).get("ok", false):
 		errors.append("The purchase-edition build must satisfy the game capability gate.")
-	for unknown_build in ["25963876", "26260645", "26547681", ""]:
+	for unknown_build in ["25963876", "26260645", "26547680", "26646593", ""]:
 		if bindings.check_evidence(bindings.verified_evidence(unknown_build)).get("ok", false):
 			errors.append("Only explicitly supported builds may satisfy the capability gate: "+unknown_build)
 	var evidence := {

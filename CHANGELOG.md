@@ -1,5 +1,19 @@
 # Changelog / Änderungen
 
+## 0.2.1 · Steam build 26646592 / Steam-Build 26646592
+
+### English
+
+- Updated the co-op mod for **Find The Needle V16.4, Steam build 26646592**. Everyone in the lobby needs mod version **0.2.1**.
+- Guests can change whether depots accept items and whether drones collect them. The host applies the changes for everyone. Pasting copied machine settings requires the host.
+- The host's gameplay settings now include the new scrap and loose hay limits, automatic scrap removal, and metal cleanup. Existing presets keep working. Audio, controls, interface, display, and graphics stay local.
+
+### Deutsch
+
+- Die Koop-Mod unterstützt **Find The Needle V16.4, Steam-Build 26646592**. Alle in der Lobby benötigen Mod-Version **0.2.1**.
+- Gäste können einstellen, ob Depots Gegenstände annehmen und ob Drohnen sie sammeln. Der Host übernimmt die Änderungen für alle. Kopierte Maschineneinstellungen kann der Host einfügen.
+- Zu den gemeinsamen Gameplay-Einstellungen gehören jetzt die neuen Limits für Schrott und lose Heubüschel, das automatische Entfernen von Schrott und das Aufräumen von Metall. Bestehende Vorlagen bleiben nutzbar. Audio, Steuerung, Oberfläche, Anzeige und Grafik bleiben beim jeweiligen Spieler.
+
 ## 0.2.0 · Guest menus and emotes / Gastmenüs und Emotes
 
 ### English

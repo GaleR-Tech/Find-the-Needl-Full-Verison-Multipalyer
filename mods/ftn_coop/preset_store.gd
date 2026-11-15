@@ -46,7 +46,7 @@ func _read() -> Dictionary:
 	var presets: Dictionary = decoded.value.presets
 	if presets.size()>20: return _error("PRESET_INVALID")
 	for name in presets:
-		if not name is String or not _valid_name(name) or not _schema().validate(presets[name]).ok: return _error("PRESET_INVALID")
+		if not name is String or not _valid_name(name) or not _schema().validate_preset(presets[name]).ok: return _error("PRESET_INVALID")
 	return _ok(presets)
 
 func _write(presets: Dictionary) -> Dictionary:

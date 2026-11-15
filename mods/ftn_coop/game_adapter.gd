@@ -1336,7 +1336,7 @@ func _apply_guest_state(authoritative: Dictionary) -> void:
 			["gifts_changed",["gifts","gifts_given","gift_card_due","missions_paid"],[]],
 			["contract_pin_changed",["contract_pinned"],[authoritative.get("contract_pinned",false)]],
 			["contracts_changed",["contract_index","contract_delivered","contracts_done","contract_parts","contract_truck_here","loads_paid"],[]],
-			["depot_changed",["depot_stock"],[]],
+			["depot_changed",["depot_stock","depot_no_drones"],[]],
 			["buyers_changed",["buyers"],[]],
 			["case_goal_changed",["case_goal"],[authoritative.get("case_goal",0)]],
 		]

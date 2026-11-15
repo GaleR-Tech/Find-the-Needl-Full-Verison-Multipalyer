@@ -3,6 +3,10 @@ extends Node
 # External native Cfg boundary. Its write guard was checked in the real demo.
 var prop_cap := 150
 var prop_decay := true
+var scrap_cap := 100
+var scrap_decay := true
+var tuft_cap := 15
+var auto_clean_metal := true
 var belt_cap := 600
 var belt_decay := true
 var auto_clean := false
@@ -31,7 +35,7 @@ func save_settings() -> void:
 	if settings_readonly or path.is_empty(): return
 	var file := ConfigFile.new()
 	file.load(path)
-	for key in ["prop_cap","prop_decay","belt_cap","belt_decay","auto_clean","auto_clean_seconds","scrap_jams","grid_lock","autosave","autosave_seconds"]:
+	for key in ["prop_cap","prop_decay","scrap_cap","scrap_decay","tuft_cap","auto_clean_metal","belt_cap","belt_decay","auto_clean","auto_clean_seconds","scrap_jams","grid_lock","autosave","autosave_seconds"]:
 		file.set_value("gameplay",key,get(key))
 	for key in ["quality","mouse_sensitivity","locale","gfx","renderer","invert_look_x","toggle_sprint","hud_scale","show_hotkey_bar","fullscreen","vsync","max_fps","window_size"]:
 		file.set_value("personal",key,get(key))
@@ -43,6 +47,18 @@ func set_prop_cap(value: int) -> void:
 
 func set_prop_decay(value: bool) -> void:
 	prop_decay = value
+	save_settings()
+func set_scrap_cap(value: int) -> void:
+	scrap_cap = clampi(value,20,1000)
+	save_settings()
+func set_scrap_decay(value: bool) -> void:
+	scrap_decay = value
+	save_settings()
+func set_tuft_cap(value: int) -> void:
+	tuft_cap = clampi(value,5,100)
+	save_settings()
+func set_auto_clean_metal(value: bool) -> void:
+	auto_clean_metal = value
 	save_settings()
 func set_belt_cap(value: int) -> void:
 	belt_cap = clampi(value,20,5000)

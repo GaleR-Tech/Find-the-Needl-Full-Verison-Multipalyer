@@ -8,6 +8,7 @@ const CALLBACKS := {
 	"_on_recipe":"recipe", "_on_empty":"depot_empty", "_on_empty_kind":"depot_empty_kind",
 	"_on_take":"depot_take", "_on_take_all":"depot_take_all", "_on_limit":"depot_limit_step",
 	"_on_limit_slid":"depot_limit", "_on_refuse":"depot_refuse",
+	"_on_keep_choice":"depot_keep_choice", "_on_drone_choice":"depot_drone_choice",
 	"_on_pole_switch":"power_pole", "_finish_naming":"power_name",
 	"_on_order":"power_order", "_on_group":"power_group", "_on_master":"power_master",
 	"_save_now":"designer_save", "_clear_now":"designer_host_only"
@@ -26,7 +27,7 @@ var _target: Node3D
 var _target_key := {}
 var _selection := ""
 var _refresh_at := 0
-var _designer_buttons: Array[Dictionary] = []
+var _host_buttons: Array[Dictionary] = []
 
 func bind_world(world: Node, send: Callable) -> void:
 	detach()
@@ -43,7 +44,7 @@ func bind_world(world: Node, send: Callable) -> void:
 			for field in ["_clear","_load"]:
 				var button: Button = panel.get(field)
 				if is_instance_valid(button):
-					_designer_buttons.append({"node":button,"disabled":button.disabled})
+					_host_buttons.append({"node":button,"disabled":button.disabled})
 					button.disabled = true
 	_wire = _player.get("wire_mode")
 	_wheel = world.get_node_or_null("EmoteWheelLayer/EmoteWheel")
@@ -204,7 +205,7 @@ func refresh() -> void:
 	if not is_instance_valid(_player): return
 	for record in _modes:
 		if is_instance_valid(record.node): _suppress_input(record.node)
-	for record in _designer_buttons:
+	for record in _host_buttons:
 		if is_instance_valid(record.node): record.node.disabled = true
 	if not is_instance_valid(_watched): return
 	if not is_instance_valid(_target) or _target.is_queued_for_deletion():
@@ -233,18 +234,29 @@ func _reopen() -> void:
 
 func _hook_tree(panel: Node) -> void:
 	_hooks = _hooks.filter(func(record): return is_instance_valid(record.node))
+	_modes = _modes.filter(func(record): return is_instance_valid(record.node))
+	_host_buttons = _host_buttons.filter(func(record): return is_instance_valid(record.node))
 	var pending: Array[Node] = [panel]
 	while not pending.is_empty():
 		var node: Node = pending.pop_back()
 		pending.append_array(node.get_children())
 		if _script_name(node)=="tag_lines.gd": _hook_tag_lines(panel,node)
-		for source in [["pressed",0],["item_selected",1],["value_changed",1],["toggled",1],["focus_exited",0]]:
+		for source in [["pressed",0],["item_selected",1],["value_changed",1],["toggled",1],["focus_exited",0],["gui_input",1]]:
 			if not node.has_signal(source[0]): continue
 			for connection in node.get_signal_connection_list(source[0]):
 				var original: Callable = connection.callable
 				var owner: Object = original.get_object()
-				if owner!=panel and _script_name(owner) not in ["production_panel.gd","priority_tabs.gd"]: continue
 				var method := str(original.get_method())
+				if method=="_on_paste" and _script_name(owner)=="settings_buttons.gd" and node is BaseButton:
+					_enable_panel(owner)
+					_host_buttons.append({"node":node,"disabled":node.disabled})
+					node.disabled = true
+					_replace(node,source[0],connection,_ignore_action)
+					continue
+				if owner!=panel and _script_name(owner) not in ["production_panel.gd","priority_tabs.gd"]: continue
+				if owner==panel and method=="_on_limit_slider_input":
+					_replace(node,source[0],connection,_ignore_event)
+					continue
 				var operation: String = CALLBACKS.get(method,"")
 				if method=="_on_switch": operation = _switch_operation(panel)
 				if panel==_panels.get("designer_panel") and node==panel.get("_load"): operation = "designer_host_only"
@@ -286,6 +298,10 @@ func _tag_name(value: String, panel: Node, id: int) -> void:
 func _switch_operation(panel: Node) -> String:
 	return "power_line" if panel==_panels.get("pole_panel") else "switch"
 
+func _ignore_action() -> void: pass
+
+func _ignore_event(_event: InputEvent) -> void: pass
+
 func _pressed(panel: Node, owner: Object, operation: String, args: Array) -> void:
 	_route(panel,owner,operation,args)
 
@@ -316,6 +332,12 @@ func _route(panel: Node, owner: Object, operation: String, args: Array) -> void:
 		"depot_refuse":
 			id = String(value)
 			value = not bool(_target.call("refuses",id))
+		"depot_keep_choice":
+			operation = "depot_refuse"
+			value = not bool(value)
+		"depot_drone_choice":
+			operation = "depot_drone_skip"
+			value = not bool(value)
 		"depot_limit_step": value = int(value)
 		"depot_limit": value = int(value)
 		"power_pole": value = _builds.get("grid").call("pole_running",_target)
@@ -376,9 +398,9 @@ func detach() -> void:
 		record.node.set_process_unhandled_key_input(record.keys)
 	_hooks.clear()
 	_modes.clear()
-	for record in _designer_buttons:
+	for record in _host_buttons:
 		if is_instance_valid(record.node): record.node.disabled = record.disabled
-	_designer_buttons.clear()
+	_host_buttons.clear()
 	_panels.clear()
 	_player = null
 	_builds = null

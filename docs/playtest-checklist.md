@@ -1,6 +1,6 @@
 # FTN-Koop · Internettest noch offen
 
-Version 0.1.1 · Steam-Kaufversion, Build 26547680 · Stand 12.11.2026.
+Version 0.2.1 · Steam-Kaufversion V16.4 (Build 26646592).
 Lokale echte Spielprozesse sind getrennt vom folgenden Internetnachweis zu bewerten.
 Niemand wurde automatisch angeschrieben oder eingeladen.
 
@@ -107,8 +107,10 @@ ist, bleibt der Internetbetrieb unbestätigt.
 - [ ] Die Quest-Checkliste schreitet bei allen Gästen voran. Schrottstaus, Käufer, Depotbestand und Schrankziel prüfen.
 - [ ] Blaupausen, Wasser- und Stromanschlüsse, spätere Produktionsstufen und eine neue Heulieferung mit einer Spielstandkopie prüfen.
 
-## Gastmenüs und Emotes in 0.2.0
+## Gastmenüs und Emotes
 
 - [ ] Mit einer beim Gast gespeicherten Blaupause beitreten. Sie im Baukatalog auswählen, drehen und platzieren. Abbuchung beim Host und Gebäude bei allen prüfen. Nach Wiederbeitritt die Baugruppe prüfen.
 - [ ] In den Originalmenüs ein Rezept wechseln, Material aus dem Depot nehmen, eine Stromleitung umbenennen und eine Wasserpumpe schalten. Bestätigte Änderungen bei Host und Gästen prüfen.
+- [ ] Im Depot einstellen, ob der ausgewählte Gegenstand angenommen wird und ob Drohnen ihn sammeln. Die bestätigten Einstellungen beim Host und einem zweiten Gast prüfen.
+- [ ] Prüfen, dass der Host Maschineneinstellungen einfügen kann und dass die Schaltfläche bei Gästen deaktiviert ist.
 - [ ] Gehen, sprinten, ducken, springen und über die Spielbelegung winken. Die Animation der anderen Figur auf beiden Seiten prüfen. Die Anzeige derben Gesten hängt von der Einstellung des Zuschauers ab.

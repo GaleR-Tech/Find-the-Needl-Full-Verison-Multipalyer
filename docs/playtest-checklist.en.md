@@ -2,7 +2,7 @@
 
 English · [Deutsch](playtest-checklist.md)
 
-Version 0.1.1 · Steam purchase build 26547680 · Updated 12 November 2026.
+Version 0.2.1 · Steam purchase edition V16.4 (build 26646592).
 Local tests with real game processes must be assessed separately from the
 Internet verification below. No one has been contacted or invited automatically.
 
@@ -109,8 +109,10 @@ accounts, Internet play remains unverified.
 - [ ] Quest checklist rows advance on all guests. Check scrap jams, buyers, depot stock and case goals.
 - [ ] Check blueprints, water and power connections, advanced production, and a new hay delivery in a copied late-game save.
 
-## 0.2.0 guest menus and emotes
+## Guest menus and emotes
 
 - [ ] Join with a blueprint saved on the guest. Select it in the build catalogue, rotate it, and place it. Check the host's charge and the new buildings on all players. Rejoin and check that the blueprint group is still present.
 - [ ] Change a recipe, withdraw a depot item, rename a power line and toggle a water pump in the original menus. Check that the host and guests see the confirmed changes.
+- [ ] In the depot, change whether a selected item is kept and whether drones collect it. Check the confirmed settings on the host and a second guest.
+- [ ] Verify that machine settings can be pasted by the host and that the guest paste button is disabled.
 - [ ] Walk, sprint, crouch and jump, then wave using the game's emote binding. Check the other player's animation on both sides. Check the optional rude-emote setting on the viewing client.

@@ -3,7 +3,7 @@ function New-FtnTestGame {
         [string]$Library,
         [string]$Directory = 'Find The Needle',
         [string]$AppId = '5160800',
-        [string]$Build = '26547680'
+        [string]$Build = '26646592'
     )
     $steamApps = Join-Path $Library 'steamapps'
     $game = Join-Path $steamApps ('common/' + $Directory)

@@ -7,6 +7,7 @@ const TAG_COUNT := 8
 const DEPOT_OPERATIONS := {
 	"depot_empty_kind": ["set_emptying_kind", TYPE_BOOL],
 	"depot_refuse": ["set_refused", TYPE_BOOL],
+	"depot_drone_skip": ["set_drones_skip", TYPE_BOOL],
 	"depot_limit": ["set_limit", TYPE_INT],
 	"depot_limit_step": ["step_limit", TYPE_INT],
 	"depot_take": ["take_one", TYPE_NIL],
@@ -130,6 +131,10 @@ static func _depot(actor: Node, world: Node, target: Node3D, operation: String, 
 	if state == null or not state.has_method("depot_cap"): return _result(false, "CAPABILITY_MISSING")
 	var cap: int = state.call("depot_cap", id)
 	if cap <= 0: return _result(false, "ACTION_INVALID")
+	if operation == "depot_drone_skip":
+		if not state.has_method(rule[0]) or not state.has_method("drones_skip"): return _result(false, "CAPABILITY_MISSING")
+		state.call(rule[0], id, value)
+		return _result(state.call("drones_skip", id) == value)
 	var panel: Variant = world.get("depot_panel")
 	if operation in ["depot_take", "depot_take_all"]:
 		if not is_instance_valid(panel) or not panel.has_method(rule[0]): return _result(false, "CAPABILITY_MISSING")
