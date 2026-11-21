@@ -16,9 +16,9 @@ Version **0.2.2** targets **V18.6 Beta**, Steam app **5160800**, build **2682579
 
 The installer also removes the mod. Audio, control, interface, display and graphics preferences stay local. The host shares gameplay settings, including scrap jams.
 
-### Verification
+### Co-op features
 
-The local test uses the purchase build with isolated profiles. Guests use the native blueprint catalogue and can save a plan from a designer pad. Clearing a pad or loading a plan onto it requires the host. The native production, depot, power and water menus send changes to the host. The game displays each remote player with its original character and synchronizes movement and emotes. The emote wheel uses the game binding (Y by default on the tested layout). Internet play between separate Steam accounts and graphical Proton play still need dedicated tests.
+Guests use the native blueprint catalogue and can save a plan from a designer pad. Clearing a pad or loading a plan onto it requires the host. The native production, depot, power and water menus send changes to the host. The game displays each remote player with its original character and synchronizes movement and emotes. The emote wheel uses the game binding (Y by default on the tested layout).
 
 [Releases](https://github.com/GaleR-Tech/Find-the-Needl-Full-Verison-Multipalyer/releases) · [Playtest checklist](docs/playtest-checklist.en.md) · [Terms of use](LICENSE.en.txt)
 
@@ -36,9 +36,9 @@ Version **0.2.2** ist für **V18.6 Beta** der Steam-Kaufversion (App **5160800**
 
 Die Mod lässt sich über denselben Installer entfernen. Audio, Steuerung, Oberfläche, Anzeige und Grafik bleiben beim jeweiligen Spieler. Der Host gibt die Gameplay-Einstellungen vor, einschließlich der Staus durch Schrott.
 
-### Prüfstand
+### Koop-Funktionen
 
-Der lokale Test nutzt die Kaufversion mit getrennten Spielprofilen. Gäste nutzen den originalen Blaupausenkatalog und können eine Vorlage vom Entwurfsplatz speichern. Den Entwurfsplatz räumen oder dort eine Vorlage laden kann der Host. Die Originalmenüs für Produktion, Depot, Strom und Wasser geben Änderungen an den Host weiter. Mitspieler erscheinen mit der Spielfigur aus dem Originalspiel. Bewegung und Emotes werden synchronisiert. Das Emote-Rad nutzt die Spielbelegung (im Test standardmäßig Y). Internetpartien mit getrennten Steam-Konten und Proton mit Grafik stehen noch als Tests aus.
+Gäste nutzen den originalen Blaupausenkatalog und können eine Vorlage vom Entwurfsplatz speichern. Den Entwurfsplatz räumen oder dort eine Vorlage laden kann der Host. Die Originalmenüs für Produktion, Depot, Strom und Wasser geben Änderungen an den Host weiter. Mitspieler erscheinen mit der Spielfigur aus dem Originalspiel. Bewegung und Emotes werden synchronisiert. Das Emote-Rad nutzt die Spielbelegung (im Test standardmäßig Y).
 
 [Downloads](https://github.com/GaleR-Tech/Find-the-Needl-Full-Verison-Multipalyer/releases) · [Testcheckliste](docs/playtest-checklist.md) · [Nutzungsbedingungen](LICENSE)
 

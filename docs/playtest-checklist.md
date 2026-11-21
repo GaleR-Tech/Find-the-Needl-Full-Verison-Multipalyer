@@ -1,7 +1,6 @@
-# FTN-Koop · Internettest noch offen
+# FTN-Koop · Testcheckliste
 
 Version 0.2.2 · Steam-Kaufversion V18.6 Beta (Build 26825799).
-Lokale echte Spielprozesse sind getrennt vom folgenden Internetnachweis zu bewerten.
 Niemand wurde automatisch angeschrieben oder eingeladen.
 
 ## Zuerst zwei Personen
@@ -45,8 +44,7 @@ Niemand wurde automatisch angeschrieben oder eingeladen.
 
 Datum, Spiel-Build, Mod-Version, Teilnehmerzahl, Internetanschlüsse und genaue Schritte
 bei einem Fehler festhalten. Keine Kontozugangsdaten oder vollständigen Spielstände
-in einen öffentlichen Bericht kopieren. Bis diese Liste mit echten Konten bestanden
-ist, bleibt der Internetbetrieb unbestätigt.
+in einen öffentlichen Bericht kopieren.
 
 ## Linux-Prüfung für 0.1.1
 
@@ -54,7 +52,7 @@ ist, bleibt der Internetbetrieb unbestätigt.
 - [ ] Installation, Update einer bestehenden Version und Entfernung testen; Spielstände, andere Mods und Original-Spiel-Dateien prüfen.
 - [ ] Die Kaufversion über Steam Proton starten; F2, Steam-Overlay, Einladungen und Laden der Welt prüfen.
 - [ ] Windows-Host/Linux-Gast und danach Linux-Host/Windows-Gast mit identischer Version 0.1.1 testen.
-- [ ] Distribution, Python-Version, Proton-Version und Ergebnis festhalten. Diese Linux-Prüfungen sind noch offen.
+- [ ] Distribution, Python-Version, Proton-Version und Ergebnis festhalten.
 
 ## Gaststeuerung und Weltabgleich in 0.1.1
 

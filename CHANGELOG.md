@@ -7,14 +7,12 @@
 - Supports Find The Needle V18.6 Beta (Steam build 26825799). All players in the lobby need mod version 0.2.2 and the same game build.
 - Guest depots refresh the affected item rows when the host changes stock. Depot drone settings still update across the session.
 - The game's new field-of-view and conveyor performance settings stay local to each player.
-- Tested locally with four game instances, including one graphical guest. The test verified world sync, conveyor cargo, hay rendering and the guest menus.
 
 ### Deutsch
 
 - Unterstützt Find The Needle V18.6 Beta (Steam-Build 26825799). Alle in der Lobby brauchen Mod-Version 0.2.2 und denselben Spiel-Build.
 - Ändert sich der Depotbestand beim Host, werden beim Gast die betroffenen Artikelzeilen aktualisiert. Die Drohneneinstellungen werden weiterhin in der Sitzung abgeglichen.
 - Die neuen Spieloptionen für Sichtfeld und Förderband-Performance bleiben beim jeweiligen Spieler.
-- Lokal mit vier Spielinstanzen geprüft, darunter ein Gast mit Grafik. Weltabgleich, Förderbandladung, Heudarstellung und Gastmenüs haben den Test bestanden.
 
 ## 0.2.1 · Steam build 26646592 / Steam-Build 26646592
 
@@ -37,14 +35,14 @@
 - Remote players now use the game's character model with movement animations and synchronized emotes. Open the emote wheel with the game's binding. On the tested keyboard layout it was **Y**.
 - Guests can select and place blueprints from their own catalogue and save new ones at a designer pad. Loading onto or clearing the pad requires the host.
 - Guests can use the original production, depot, power and water menus. The host validates shared changes such as recipe changes, depot withdrawals and pump switches.
-- Tested with four local game instances, including one graphical guest, on Steam build **26547680**. Internet play across separate Steam accounts and Proton gameplay still need testing. All players need mod version **0.2.0**.
+- Supports Steam build **26547680**. All players need mod version **0.2.0**.
 
 ### Deutsch
 
 - Mitspieler erscheinen als Spielfiguren mit Bewegungsanimationen und synchronisierten Emotes. Das Emote-Rad öffnet sich über die Spielbelegung, im Test mit **Y**.
 - Gäste können Blaupausen aus ihrem eigenen Katalog auswählen und platzieren sowie am Entwurfsplatz neue Vorlagen speichern. Vorlagen auf den Entwurfsplatz laden oder ihn räumen kann der Host.
 - Gäste können die Originalmenüs für Produktion, Depot, Strom und Wasser nutzen. Der Host prüft gemeinsame Änderungen wie Rezeptwechsel, Depotentnahmen und das Schalten von Pumpen.
-- Lokal mit vier Spielinstanzen geprüft, davon ein Gast mit Grafik. Unterstützt wird Steam-Build **26547680**. Internetpartien mit getrennten Steam-Konten und das Spielen unter Proton stehen noch als Tests aus. Alle Spieler brauchen Mod-Version **0.2.0**.
+- Unterstützt wird Steam-Build **26547680**. Alle Spieler brauchen Mod-Version **0.2.0**.
 
 ## 0.1.1 · Update check / Updateprüfung
 

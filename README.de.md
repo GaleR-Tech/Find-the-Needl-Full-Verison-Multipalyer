@@ -14,9 +14,9 @@ Version **0.2.2** ist für **V18.6 Beta** der Steam-Kaufversion (App **5160800**
 
 Die Mod lässt sich über denselben Installer entfernen. Audio, Steuerung, Oberfläche, Anzeige und Grafik bleiben beim jeweiligen Spieler. Der Host gibt die Gameplay-Einstellungen vor, einschließlich der Staus durch Schrott.
 
-### Prüfstand
+### Koop-Funktionen
 
-Der lokale Test nutzt die Kaufversion mit getrennten Spielprofilen. Gäste nutzen den originalen Blaupausenkatalog und können eine Vorlage vom Entwurfsplatz speichern. Den Entwurfsplatz räumen oder dort eine Vorlage laden kann der Host. Die Originalmenüs für Produktion, Depot, Strom und Wasser geben Änderungen an den Host weiter. Mitspieler erscheinen mit der Spielfigur aus dem Originalspiel. Bewegung und Emotes werden synchronisiert. Das Emote-Rad nutzt die Spielbelegung (im Test standardmäßig Y). Internetpartien mit getrennten Steam-Konten und Proton mit Grafik stehen noch als Tests aus.
+Gäste nutzen den originalen Blaupausenkatalog und können eine Vorlage vom Entwurfsplatz speichern. Den Entwurfsplatz räumen oder dort eine Vorlage laden kann der Host. Die Originalmenüs für Produktion, Depot, Strom und Wasser geben Änderungen an den Host weiter. Mitspieler erscheinen mit der Spielfigur aus dem Originalspiel. Bewegung und Emotes werden synchronisiert. Das Emote-Rad nutzt die Spielbelegung (im Test standardmäßig Y).
 
 [Downloads](https://github.com/GaleR-Tech/Find-the-Needl-Full-Verison-Multipalyer/releases) · [Testcheckliste](docs/playtest-checklist.md) · [Nutzungsbedingungen](LICENSE)
 

@@ -14,9 +14,9 @@ Version **0.2.2** targets **V18.6 Beta**, Steam app **5160800**, build **2682579
 
 The installer also removes the mod. Audio, control, interface, display and graphics preferences stay local. The host shares gameplay settings, including scrap jams.
 
-### Verification
+### Co-op features
 
-The local test uses the purchase build with isolated profiles. Guests use the native blueprint catalogue and can save a plan from a designer pad. Clearing a pad or loading a plan onto it requires the host. The native production, depot, power and water menus send changes to the host. The game displays each remote player with its original character and synchronizes movement and emotes. The emote wheel uses the game binding (Y by default on the tested layout). Internet play between separate Steam accounts and graphical Proton play still need dedicated tests.
+Guests use the native blueprint catalogue and can save a plan from a designer pad. Clearing a pad or loading a plan onto it requires the host. The native production, depot, power and water menus send changes to the host. The game displays each remote player with its original character and synchronizes movement and emotes. The emote wheel uses the game binding (Y by default on the tested layout).
 
 [Releases](https://github.com/GaleR-Tech/Find-the-Needl-Full-Verison-Multipalyer/releases) · [Playtest checklist](docs/playtest-checklist.en.md) · [Terms of use](LICENSE.en.txt)
 

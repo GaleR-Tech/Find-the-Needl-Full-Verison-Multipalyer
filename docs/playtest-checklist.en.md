@@ -1,10 +1,9 @@
-# FTN-Coop Full · Internet play still unverified
+# FTN-Coop Full · Playtest checklist
 
 English · [Deutsch](playtest-checklist.md)
 
 Version 0.2.2 · Steam purchase edition V18.6 Beta (build 26825799).
-Local tests with real game processes must be assessed separately from the
-Internet verification below. No one has been contacted or invited automatically.
+No one has been contacted or invited automatically.
 
 ## First, two people
 
@@ -47,8 +46,7 @@ Internet verification below. No one has been contacted or invited automatically.
 
 Record the date, game build, mod version, participant count, Internet connections
 and exact steps when an error occurs. Do not copy account credentials or complete
-save files into a public report. Until this checklist has been passed with real
-accounts, Internet play remains unverified.
+save files into a public report.
 
 ## Linux 0.1.1 verification
 
@@ -56,7 +54,7 @@ accounts, Internet play remains unverified.
 - [ ] Test install, update from an existing version, and removal; verify unchanged saves, other mods and original game files.
 - [ ] Start the purchase build through Steam Proton; verify F2, Steam overlay, invitations and world loading.
 - [ ] Test Windows-host/Linux-guest, then Linux-host/Windows-guest, with matching 0.1.1 packages.
-- [ ] Record distribution, Python version, Proton version and result. These Linux checks have not yet been completed.
+- [ ] Record distribution, Python version, Proton version and result.
 
 ## Guest controls and synchronization in 0.1.1
 
