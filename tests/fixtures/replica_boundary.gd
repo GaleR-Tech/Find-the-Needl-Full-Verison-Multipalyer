@@ -33,8 +33,10 @@ class Records extends Node:
 
 class LiveState extends Node:
 	signal collection_loaded
+	signal depot_changed
+	signal depot_kind_changed(id: String)
 	signal money_changed(amount: float)
-	var data := {"money":10.0,"mission_index":0,"mission_id":"first_hay","needle_stock":[0]}
+	var data := {"money":10.0,"mission_index":0,"mission_id":"first_hay","needle_stock":[0],"depot_stock":{},"depot_no_drones":[]}
 	func to_dict() -> Dictionary: return data
 	func from_dict(value: Dictionary) -> void:
 		data = value.duplicate(true)

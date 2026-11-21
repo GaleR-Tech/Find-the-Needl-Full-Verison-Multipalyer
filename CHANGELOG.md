@@ -1,5 +1,21 @@
 # Changelog / Änderungen
 
+## 0.2.2 · V18.6 Beta
+
+### English
+
+- Supports Find The Needle V18.6 Beta (Steam build 26825799). All players in the lobby need mod version 0.2.2 and the same game build.
+- Guest depots refresh the affected item rows when the host changes stock. Depot drone settings still update across the session.
+- The game's new field-of-view and conveyor performance settings stay local to each player.
+- Tested locally with four game instances, including one graphical guest. The test verified world sync, conveyor cargo, hay rendering and the guest menus.
+
+### Deutsch
+
+- Unterstützt Find The Needle V18.6 Beta (Steam-Build 26825799). Alle in der Lobby brauchen Mod-Version 0.2.2 und denselben Spiel-Build.
+- Ändert sich der Depotbestand beim Host, werden beim Gast die betroffenen Artikelzeilen aktualisiert. Die Drohneneinstellungen werden weiterhin in der Sitzung abgeglichen.
+- Die neuen Spieloptionen für Sichtfeld und Förderband-Performance bleiben beim jeweiligen Spieler.
+- Lokal mit vier Spielinstanzen geprüft, darunter ein Gast mit Grafik. Weltabgleich, Förderbandladung, Heudarstellung und Gastmenüs haben den Test bestanden.
+
 ## 0.2.1 · Steam build 26646592 / Steam-Build 26646592
 
 ### English

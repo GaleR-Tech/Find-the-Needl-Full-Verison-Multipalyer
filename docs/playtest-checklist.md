@@ -1,6 +1,6 @@
 # FTN-Koop · Internettest noch offen
 
-Version 0.2.1 · Steam-Kaufversion V16.4 (Build 26646592).
+Version 0.2.2 · Steam-Kaufversion V18.6 Beta (Build 26825799).
 Lokale echte Spielprozesse sind getrennt vom folgenden Internetnachweis zu bewerten.
 Niemand wurde automatisch angeschrieben oder eingeladen.
 

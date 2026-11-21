@@ -5,7 +5,7 @@ $builder = Join-Path $projectRoot 'tools\Package.ps1'
 if (-not (Test-Path -LiteralPath $builder)) { throw 'Package builder is missing.' }
 & $builder
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$archivePath = Join-Path $projectRoot 'dist\0.2\0.2.1\FTN-Coop-Full-0.2.1.zip'
+$archivePath = Join-Path $projectRoot 'dist\0.2\0.2.2\FTN-Coop-Full-0.2.2.zip'
 $archive = [IO.Compression.ZipFile]::OpenRead($archivePath)
 try {
     $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\','/') })
@@ -22,8 +22,8 @@ try {
         if ($actual -ne (Get-FileHash -LiteralPath $sourcePath -Algorithm SHA256).Hash) { throw ('Archive differs from source: '+$entry.FullName) }
     }
     $readme = Get-Content (Join-Path $projectRoot 'README.md') -Raw
-    if ($readme -notmatch '0\.2\.1' -or $readme -notmatch '26646592') { throw 'Version and build must be documented.' }
-    if ((Get-Content (Join-Path $projectRoot 'mods\ftn_coop/bootstrap.gd') -Raw) -notmatch 'const VERSION := "0\.2\.1"') { throw 'Documented version differs from runtime.' }
+    if ($readme -notmatch '0\.2\.2' -or $readme -notmatch '26825799') { throw 'Version and build must be documented.' }
+    if ((Get-Content (Join-Path $projectRoot 'mods\ftn_coop/bootstrap.gd') -Raw) -notmatch 'const VERSION := "0\.2\.2"') { throw 'Documented version differs from runtime.' }
 }
 finally { $archive.Dispose() }
 $extractRoot = Join-Path ([IO.Path]::GetTempPath()) ('ftn-coop-package-'+[guid]::NewGuid().ToString('N'))

@@ -57,9 +57,9 @@ func run(tree: SceneTree) -> Array[String]:
 		return ["Purchase-edition compatibility is not registered yet."]
 	if not bindings.verified_evidence("unknown-build").is_empty():
 		errors.append("An untested build must not inherit verified bindings.")
-	if not bindings.check_evidence(bindings.verified_evidence("26646592")).get("ok", false):
+	if not bindings.check_evidence(bindings.verified_evidence("26825799")).get("ok", false):
 		errors.append("The purchase-edition build must satisfy the game capability gate.")
-	for unknown_build in ["25963876", "26260645", "26547680", "26646593", ""]:
+	for unknown_build in ["25963876", "26260645", "26547680", "26646592", "26825800", ""]:
 		if bindings.check_evidence(bindings.verified_evidence(unknown_build)).get("ok", false):
 			errors.append("Only explicitly supported builds may satisfy the capability gate: "+unknown_build)
 	var evidence := {
@@ -476,6 +476,24 @@ func live_state_checks(errors: Array[String]) -> void:
 	changed.needle_stock = [1]
 	adapter.apply_confirmed_event({"patch":{"state":changed}})
 	if is_instance_valid(original): errors.append("A changed collection must still refresh its native UI.")
+	var depot_events: Array[String] = []
+	state.depot_kind_changed.connect(func(id: String): depot_events.append(id))
+	state.depot_changed.connect(func(): depot_events.append("*"))
+	changed.depot_stock = {"paper_roll":5,"gear_set":2}
+	adapter.apply_confirmed_event({"patch":{"state":changed}})
+	depot_events.clear()
+	changed.depot_stock = {"paper_roll":4,"carbon":1}
+	adapter.apply_confirmed_event({"patch":{"state":changed}})
+	if depot_events.size()!=4 or depot_events.back()!="*" or not depot_events.has("paper_roll") or not depot_events.has("gear_set") or not depot_events.has("carbon"):
+		errors.append("A V18.6 depot update must notify native listeners about each changed item before the general refresh.")
+	depot_events.clear()
+	changed.depot_no_drones = ["paper_roll"]
+	adapter.apply_confirmed_event({"patch":{"state":changed}})
+	if depot_events!=["*"]: errors.append("Drone policy alone must refresh the depot without changing item counts.")
+	depot_events.clear()
+	changed.money = 26.0
+	adapter.apply_confirmed_event({"patch":{"state":changed}})
+	if not depot_events.is_empty(): errors.append("Unrelated state changes must not refresh native depot item rows.")
 	wallet.free()
 	collection.free()
 	world.free()

@@ -30,7 +30,7 @@ func run(tree: SceneTree) -> Array[String]:
 	if not ui.has_method("diagnostic_report") or not ui.has_method("set_load_progress") or not ui.has_method("show_saved"):
 		errors.append("0.4.0 needs safe diagnostics, actual load progress and save confirmation.")
 	else:
-		ui.configure_diagnostics("26646592","0.4.0")
+		ui.configure_diagnostics("26825799","0.4.0")
 		session.state = session.State.SYNCING
 		session.roster = {1:{"name":"PRIVATE_NAME C:/Users/SECRET"},2:{"name":"76561190000000000"}}
 		ui.set_load_progress("receiving",50,100)
@@ -41,7 +41,7 @@ func run(tree: SceneTree) -> Array[String]:
 		session.state = session.State.OFFLINE
 		session.roster.clear()
 		var report: String = ui.diagnostic_report()
-		for required in ["0.4.0","26646592","TRANSFER_TIMEOUT","2 / 4"]:
+		for required in ["0.4.0","26825799","TRANSFER_TIMEOUT","2 / 4"]:
 			if not report.contains(required): errors.append("Diagnostics lost useful failure context: "+required)
 		for forbidden in ["PRIVATE_NAME","C:/Users/SECRET","76561190000000000"]:
 			if report.contains(forbidden): errors.append("Diagnostics exposed personal/session data.")
@@ -86,7 +86,7 @@ func run(tree: SceneTree) -> Array[String]:
 	var game: RefCounted = load("res://tests/fixtures/network_game_boundary.gd").new()
 	game.tree = tree
 	tree.root.add_child(runtime)
-	runtime.configure(game,transport,"26646592","0.4.0")
+	runtime.configure(game,transport,"26825799","0.4.0")
 	runtime.ui.set_language("de")
 	transport.simulate_invitation(42)
 	if transport.join_calls!=1 or runtime.network.session.state!=runtime.network.session.State.JOINING: errors.append("Steam invitations must be received before the player ever hosts or joins manually.")
@@ -116,7 +116,7 @@ func run(tree: SceneTree) -> Array[String]:
 	await tree.process_frame
 	runtime.queue_free()
 	await tree.process_frame
-	for build in ["26646592", "26260645", "unknown-build"]:
+	for build in ["26825799", "26260645", "unknown-build"]:
 		var build_runtime: Node = load("res://mods/ftn_coop/coop_runtime.gd").new()
 		var build_wire: Node = load("res://tests/fixtures/pipe_transport.gd").new()
 		var build_game: RefCounted = load("res://tests/fixtures/network_game_boundary.gd").new()
@@ -124,7 +124,7 @@ func run(tree: SceneTree) -> Array[String]:
 		tree.root.add_child(build_runtime)
 		build_runtime.configure(build_game,build_wire,build,"0.7.2")
 		build_wire.simulate_invitation(42)
-		if build=="26646592":
+		if build=="26825799":
 			if build_wire.join_calls!=1 or build_runtime.network.session.state!=build_runtime.network.session.State.JOINING:
 				errors.append("A purchase-edition invitation must reach the normal joining lifecycle.")
 		elif build_wire.join_calls!=0:

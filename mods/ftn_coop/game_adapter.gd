@@ -1324,6 +1324,7 @@ func _apply_guest_state(authoritative: Dictionary) -> void:
 		if authoritative.has(field): state.set(field,authoritative[field])
 	state.set_block_signals(blocked)
 	if not blocked:
+		_emit_guest_depot_changes(state,before.get("depot_stock",{}),displayed.get("depot_stock",{}))
 		var updates := [
 			["money_changed",["money"],[authoritative.get("money",0.0)]],
 			["debt_changed",["debt"],[authoritative.get("debt",0.0)]],
@@ -1347,6 +1348,14 @@ func _apply_guest_state(authoritative: Dictionary) -> void:
 					state.callv("emit_signal",[update[0]]+update[2])
 					break
 	_refresh_guest_quests(authoritative)
+
+func _emit_guest_depot_changes(state: Node, previous: Variant, current: Variant) -> void:
+	if previous==current or not previous is Dictionary or not current is Dictionary: return
+	if not state.has_signal("depot_kind_changed"): return
+	# V18.6 refreshes native depot consumers by item before the general update.
+	for id in previous.merged(current):
+		if id is String and previous.get(id,0)!=current.get(id,0):
+			state.emit_signal("depot_kind_changed",id)
 
 func _refresh_guest_quests(authoritative: Dictionary) -> void:
 	if not nodes.has("world") or not authoritative.has("mission_index"): return

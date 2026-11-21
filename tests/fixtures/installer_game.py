@@ -2,7 +2,7 @@
 from pathlib import Path
 
 
-def make_game(library, directory="Find The Needle", appid="5160800", build="26646592"):
+def make_game(library, directory="Find The Needle", appid="5160800", build="26825799"):
     steam_apps = Path(library) / "steamapps"
     game = steam_apps / "common" / directory
     game.mkdir(parents=True)

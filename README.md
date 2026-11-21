@@ -1,4 +1,4 @@
-# FTN-Coop Full · 0.2.1
+# FTN-Coop Full · 0.2.2
 
 [English](#english) · [Deutsch](#deutsch)
 
@@ -6,12 +6,12 @@
 
 FTN-Coop Full is an unofficial co-op mod for the Steam purchase edition of Find The Needle. One player hosts a world and can invite up to three friends. The host keeps the shared save.
 
-Version **0.2.1** targets Steam app **5160800**, build **26646592**. Everyone needs the same mod and game build. The demo has its own [project and downloads](https://github.com/GaleR-Tech/FTN-Coop).
+Version **0.2.2** targets **V18.6 Beta**, Steam app **5160800**, build **26825799**. Everyone needs the same mod and game build. The demo has its own [project and downloads](https://github.com/GaleR-Tech/FTN-Coop).
 
 ### Install and play
 
-1. Close the game. On Windows, run `FTN-Coop-Full-0.2.1-Setup.exe`. With the ZIP, extract it first and run `Install.cmd`.
-2. Check the Steam game folder and choose **Install**. On Linux with Steam Proton, run `python3 FTN-Coop-Full-0.2.1-Linux.run`. Add `--cli` for a terminal without Tk.
+1. Close the game. On Windows, run `FTN-Coop-Full-0.2.2-Setup.exe`. With the ZIP, extract it first and run `Install.cmd`.
+2. Check the Steam game folder and choose **Install**. On Linux with Steam Proton, run `python3 FTN-Coop-Full-0.2.2-Linux.run`. Add `--cli` for a terminal without Tk.
 3. Start the game through Steam. Load a world and press **F2** to start a private session. Invite friends through the Steam overlay.
 
 The installer also removes the mod. Audio, control, interface, display and graphics preferences stay local. The host shares gameplay settings, including scrap jams.
@@ -26,12 +26,12 @@ The local test uses the purchase build with isolated profiles. Guests use the na
 
 FTN-Coop Full ist eine inoffizielle Koop-Mod für die Steam-Kaufversion von Find The Needle. Ein Spieler hostet die Welt und kann bis zu drei Freunde einladen. Der gemeinsame Spielstand liegt beim Host.
 
-Version **0.2.1** ist für Steam-App **5160800**, Build **26646592** vorgesehen. Alle Spieler brauchen denselben Spiel-Build und dieselbe Mod-Version. Die Demo hat ein [eigenes Projekt mit Downloads](https://github.com/GaleR-Tech/FTN-Coop).
+Version **0.2.2** ist für **V18.6 Beta** der Steam-Kaufversion (App **5160800**, Build **26825799**) vorgesehen. Alle Spieler brauchen denselben Spiel-Build und dieselbe Mod-Version. Die Demo hat ein [eigenes Projekt mit Downloads](https://github.com/GaleR-Tech/FTN-Coop).
 
 ### Installation und Spielstart
 
-1. Spiel schließen. Unter Windows `FTN-Coop-Full-0.2.1-Setup.exe` starten. Beim ZIP zuerst entpacken und `Installieren.cmd` starten.
-2. Den Steam-Spielordner prüfen und **Installieren** wählen. Unter Linux mit Steam Proton `python3 FTN-Coop-Full-0.2.1-Linux.run` ausführen. Für ein Terminal ohne Tk `--cli` anhängen.
+1. Spiel schließen. Unter Windows `FTN-Coop-Full-0.2.2-Setup.exe` starten. Beim ZIP zuerst entpacken und `Installieren.cmd` starten.
+2. Den Steam-Spielordner prüfen und **Installieren** wählen. Unter Linux mit Steam Proton `python3 FTN-Coop-Full-0.2.2-Linux.run` ausführen. Für ein Terminal ohne Tk `--cli` anhängen.
 3. Das Spiel über Steam starten. Eine Welt laden und mit **F2** eine private Sitzung starten. Freunde über das Steam-Overlay einladen.
 
 Die Mod lässt sich über denselben Installer entfernen. Audio, Steuerung, Oberfläche, Anzeige und Grafik bleiben beim jeweiligen Spieler. Der Host gibt die Gameplay-Einstellungen vor, einschließlich der Staus durch Schrott.

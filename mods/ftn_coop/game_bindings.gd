@@ -1,7 +1,7 @@
 extends RefCounted
 
 const STEAM_APP_ID := "5160800"
-const SUPPORTED_BUILD := "26646592"
+const SUPPORTED_BUILD := "26825799"
 const BUILD_TOOL := 9
 
 const REQUIRED := [

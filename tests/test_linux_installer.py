@@ -55,7 +55,7 @@ class LinuxInstallerTests(unittest.TestCase):
     def test_unknown_build_refuses_install_and_allows_removal(self):
         self.install()
         manifest = self.game.parent.parent / "appmanifest_5160800.acf"
-        manifest.write_text(manifest.read_text("utf-8").replace("26646592", "99999999"), encoding="utf-8")
+        manifest.write_text(manifest.read_text("utf-8").replace("26825799", "99999999"), encoding="utf-8")
         before = self.config.read_bytes()
         with self.assertRaisesRegex(self.core.InstallError, "GAME_BUILD_UNSUPPORTED"):
             self.install()

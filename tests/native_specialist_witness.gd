@@ -44,6 +44,9 @@ func exercise(check: Node, adapter: RefCounted, runtime: Node) -> Dictionary:
 			paste.pressed.emit()
 			if runtime.network._sequence!=before: return _error("MACHINE_PASTE_SENT",result)
 			result.machine_paste_host_only = true
+		var changed_items: Array[String] = []
+		var depot_item_changed := func(id: String): changed_items.append(id)
+		if scenario[4]=="paper_roll": adapter.nodes.state.depot_kind_changed.connect(depot_item_changed)
 		var depot_refresh := [false]
 		var depot_changed := func(): depot_refresh[0] = true
 		if scenario[4]=="depot_drone_skip": adapter.nodes.state.depot_changed.connect(depot_changed)
@@ -75,6 +78,10 @@ func exercise(check: Node, adapter: RefCounted, runtime: Node) -> Dictionary:
 				"is_switched_off": actual = target.call("is_switched_off")
 			if actual==scenario[5]: break
 		if actual!=scenario[5]: return _error("REPLICA_"+scenario[0]+"_"+str(actual),result)
+		if scenario[4]=="paper_roll":
+			adapter.nodes.state.depot_kind_changed.disconnect(depot_item_changed)
+			if changed_items!=["paper_roll"]: return _error("DEPOT_ITEM_REFRESH",result)
+			result.depot_item_refresh = true
 		if scenario[4]=="depot_drone_skip":
 			adapter.nodes.state.depot_changed.disconnect(depot_changed)
 			if not depot_refresh[0]: return _error("DEPOT_DRONE_REFRESH",result)

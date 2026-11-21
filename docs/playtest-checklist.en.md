@@ -2,7 +2,7 @@
 
 English · [Deutsch](playtest-checklist.md)
 
-Version 0.2.1 · Steam purchase edition V16.4 (build 26646592).
+Version 0.2.2 · Steam purchase edition V18.6 Beta (build 26825799).
 Local tests with real game processes must be assessed separately from the
 Internet verification below. No one has been contacted or invited automatically.
 

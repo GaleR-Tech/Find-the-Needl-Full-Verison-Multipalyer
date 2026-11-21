@@ -11,7 +11,7 @@ import tempfile
 LIMIT = 1048576
 RECORD_LIMIT = 2 * LIMIT
 STEAM_APP = "5160800"
-SUPPORTED_BUILD = "26646592"
+SUPPORTED_BUILD = "26825799"
 INSTALL_FORMAT = "FTN-Coop-Full-1"
 OWN_ENTRY = 'FtnCoop="*mods/ftn_coop/bootstrap.gd"'
 NAME = re.compile(r"[a-z_]+\.gd\Z")

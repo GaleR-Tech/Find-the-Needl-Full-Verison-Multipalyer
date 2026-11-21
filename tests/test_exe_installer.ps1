@@ -7,7 +7,7 @@ if (-not (Test-Path -LiteralPath $builder)) { throw 'EXE installer builder is mi
 if ($SetupPath) { $setup = $SetupPath }
 else {
     & $builder
-    $setup = Join-Path $projectRoot 'dist\0.2\0.2.1\FTN-Coop-Full-0.2.1-Setup.exe'
+    $setup = Join-Path $projectRoot 'dist\0.2\0.2.2\FTN-Coop-Full-0.2.2-Setup.exe'
 }
 if (-not (Test-Path -LiteralPath $setup)) { throw 'Single-file EXE installer was not built.' }
 function Require([bool]$condition,[string]$message) { if (-not $condition) { throw $message } }
